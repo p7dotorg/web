@@ -17,43 +17,51 @@ async function search(formData: FormData) {
 }
 
 async function getFeatured() {
-  const allPapers = await db.select().from(papers)
-  const allAnnotations = await db.select().from(annotations).orderBy(desc(annotations.upvotes))
+  try {
+    const allPapers = await db.select().from(papers)
+    const allAnnotations = await db.select().from(annotations).orderBy(desc(annotations.upvotes))
 
-  const byPaper = new Map<string, typeof allAnnotations>()
-  for (const a of allAnnotations) {
-    if (!byPaper.has(a.paperId)) byPaper.set(a.paperId, [])
-    byPaper.get(a.paperId)!.push(a)
+    const byPaper = new Map<string, typeof allAnnotations>()
+    for (const a of allAnnotations) {
+      if (!byPaper.has(a.paperId)) byPaper.set(a.paperId, [])
+      byPaper.get(a.paperId)!.push(a)
+    }
+
+    return allPapers
+      .filter(p => byPaper.has(p.arxivId))
+      .map(p => ({
+        arxivId: p.arxivId,
+        title: p.title,
+        authors: p.authors,
+        annotationCount: byPaper.get(p.arxivId)!.length,
+        topAnnotation: byPaper.get(p.arxivId)![0] ?? null,
+      }))
+      .sort((a, b) => b.annotationCount - a.annotationCount)
+      .slice(0, 6)
+  } catch {
+    return []
   }
-
-  return allPapers
-    .filter(p => byPaper.has(p.arxivId))
-    .map(p => ({
-      arxivId: p.arxivId,
-      title: p.title,
-      authors: p.authors,
-      annotationCount: byPaper.get(p.arxivId)!.length,
-      topAnnotation: byPaper.get(p.arxivId)![0] ?? null,
-    }))
-    .sort((a, b) => b.annotationCount - a.annotationCount)
-    .slice(0, 6)
 }
 
 async function getTopAnnotations() {
-  return db
-    .select({
-      id: annotations.id,
-      body: annotations.body,
-      anchorText: annotations.anchorText,
-      authorName: annotations.authorName,
-      upvotes: annotations.upvotes,
-      paperId: annotations.paperId,
-      paperTitle: papers.title,
-    })
-    .from(annotations)
-    .innerJoin(papers, eq(annotations.paperId, papers.arxivId))
-    .orderBy(desc(annotations.upvotes))
-    .limit(5)
+  try {
+    return await db
+      .select({
+        id: annotations.id,
+        body: annotations.body,
+        anchorText: annotations.anchorText,
+        authorName: annotations.authorName,
+        upvotes: annotations.upvotes,
+        paperId: annotations.paperId,
+        paperTitle: papers.title,
+      })
+      .from(annotations)
+      .innerJoin(papers, eq(annotations.paperId, papers.arxivId))
+      .orderBy(desc(annotations.upvotes))
+      .limit(5)
+  } catch {
+    return []
+  }
 }
 
 export default async function Home() {
