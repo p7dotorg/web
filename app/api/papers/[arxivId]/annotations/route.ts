@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@clerk/nextjs/server"
 import { db } from "@/db"
 import { annotations, papers } from "@/db/schema"
 import { fetchPaper } from "@/lib/arxiv"
@@ -22,14 +21,13 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ arxivId: string }> }
 ) {
-  const { userId, sessionClaims } = await auth()
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
   const { arxivId } = await params
-  const { anchorText, anchorStart, anchorEnd, body } = await req.json()
-  if (!anchorText || !body) return NextResponse.json({ error: "Missing fields" }, { status: 400 })
+  const { anchorText, anchorStart, anchorEnd, body, authorName, authorId } = await req.json()
 
-  // Ensure paper exists in DB
+  if (!anchorText || !body || !authorName?.trim()) {
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 })
+  }
+
   const existing = await db.select().from(papers).where(eq(papers.arxivId, arxivId)).limit(1)
   if (!existing.length) {
     const meta = await fetchPaper(arxivId)
@@ -37,10 +35,14 @@ export async function POST(
     await db.insert(papers).values(meta).onConflictDoNothing()
   }
 
-  const authorName = (sessionClaims?.name as string) ?? (sessionClaims?.email as string) ?? "Anonymous"
   const [row] = await db.insert(annotations).values({
-    paperId: arxivId, anchorText, anchorStart, anchorEnd, body,
-    authorId: userId, authorName,
+    paperId: arxivId,
+    anchorText,
+    anchorStart,
+    anchorEnd,
+    body,
+    authorId: authorId ?? "anon",
+    authorName: authorName.trim(),
   }).returning()
 
   return NextResponse.json(row, { status: 201 })

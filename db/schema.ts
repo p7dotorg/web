@@ -1,13 +1,14 @@
 import { pgTable, text, integer, timestamp, uuid, index } from "drizzle-orm/pg-core"
 
 export const papers = pgTable("papers", {
-  arxivId:   text("arxiv_id").primaryKey(),
-  title:     text("title").notNull(),
-  authors:   text("authors").notNull(),
-  abstract:  text("abstract").notNull(),
-  markdown:  text("markdown").notNull(),
-  version:   text("version").notNull().default("v1"),
-  fetchedAt: timestamp("fetched_at").notNull().defaultNow(),
+  arxivId:    text("arxiv_id").primaryKey(),
+  title:      text("title").notNull(),
+  authors:    text("authors").notNull(),
+  abstract:   text("abstract").notNull(),
+  markdown:   text("markdown").notNull(),
+  version:    text("version").notNull().default("v1"),
+  categories: text("categories").notNull().default(""),
+  fetchedAt:  timestamp("fetched_at").notNull().defaultNow(),
 })
 
 export const annotations = pgTable("annotations", {

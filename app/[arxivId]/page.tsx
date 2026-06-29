@@ -2,7 +2,8 @@ import { notFound } from "next/navigation"
 import { db } from "@/db"
 import { papers, annotations } from "@/db/schema"
 import { fetchPaper } from "@/lib/arxiv"
-import { eq } from "drizzle-orm"
+import { fetchRelated } from "@/lib/related"
+import { eq, desc } from "drizzle-orm"
 import PaperReader from "@/components/PaperReader"
 
 export async function generateMetadata({ params }: { params: Promise<{ arxivId: string }> }) {
@@ -14,7 +15,6 @@ export async function generateMetadata({ params }: { params: Promise<{ arxivId: 
 export default async function PaperPage({ params }: { params: Promise<{ arxivId: string }> }) {
   const { arxivId } = await params
 
-  // Load from DB or fetch fresh
   let [paper] = await db.select().from(papers).where(eq(papers.arxivId, arxivId)).limit(1)
   if (!paper) {
     const meta = await fetchPaper(arxivId)
@@ -23,16 +23,16 @@ export default async function PaperPage({ params }: { params: Promise<{ arxivId:
     paper = meta as typeof paper
   }
 
-  const paperAnnotations = await db
-    .select()
-    .from(annotations)
-    .where(eq(annotations.paperId, arxivId))
-    .orderBy(annotations.upvotes)
+  const [paperAnnotations, related] = await Promise.all([
+    db.select().from(annotations).where(eq(annotations.paperId, arxivId)).orderBy(desc(annotations.upvotes)),
+    fetchRelated(arxivId),
+  ])
 
   return (
     <PaperReader
       paper={paper}
       initialAnnotations={paperAnnotations}
+      related={related}
     />
   )
 }
