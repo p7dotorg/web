@@ -3,6 +3,9 @@ import { db } from "@/db"
 import { papers, annotations } from "@/db/schema"
 import { desc, eq } from "drizzle-orm"
 import Link from "next/link"
+import NavAuth from "@/components/NavAuth"
+import CommandPalette from "@/components/CommandPalette"
+import SearchTrigger from "@/components/SearchTrigger"
 
 async function search(formData: FormData) {
   "use server"
@@ -72,44 +75,29 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-black text-[#fcfdff]">
+      <CommandPalette />
+
       {/* Nav */}
       <nav
-        className="sticky top-0 z-50 flex items-center justify-between px-8 h-16"
+        className="sticky top-0 z-40 flex items-center justify-between px-8 h-16"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "#000" }}
       >
         <span className="font-display text-xl font-medium tracking-tight text-[#fcfdff]">p7</span>
 
-        <form action={search} className="flex gap-2 w-full max-w-sm mx-10">
-          <input
-            name="q"
-            placeholder="arXiv ID or URL"
-            className="flex-1 h-9 px-3 rounded-lg text-sm text-[#fcfdff] placeholder:text-[var(--ash)]
-                       bg-[#0a0a0c] focus:outline-none transition-colors"
-            style={{ border: "1px solid rgba(255,255,255,0.14)" }}
-          />
-          <button
-            type="submit"
-            className="h-9 px-4 rounded-lg text-sm font-medium bg-[#fcfdff] text-black
-                       hover:bg-[#f1f7fe] transition-colors whitespace-nowrap"
-          >
-            Open →
-          </button>
-        </form>
+        <SearchTrigger />
 
-        <span className="text-[var(--ash)] text-xs hidden md:block">Like Genius, but for papers.</span>
+        <NavAuth />
       </nav>
 
-      {/* Hero — atmospheric orange glow */}
+      {/* Hero */}
       <section
         className="relative px-8 pt-24 pb-20 overflow-hidden"
         style={{
           background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,89,0,0.18) 0%, transparent 70%)",
         }}
       >
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <p
-            className="text-xs font-medium tracking-widest text-[var(--charcoal)] uppercase"
-          >
+        <div className="max-w-3xl mx-auto text-center space-y-8">
+          <p className="text-xs font-medium tracking-widest text-[var(--charcoal)] uppercase">
             Marginalia for arXiv
           </p>
 
@@ -125,24 +113,30 @@ export default async function Home() {
             Understand the subtext. Surface what the abstract hides.
           </p>
 
-          <div className="flex items-center justify-center gap-3 pt-2">
-            <form action={search} className="flex gap-2">
+          {/* Two primary CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <form action={search} className="flex gap-2 w-full sm:w-auto">
               <input
                 name="q"
-                autoFocus
                 placeholder="2401.12345 or arxiv.org/abs/…"
-                className="flex-1 min-w-0 h-9 px-3 rounded-lg text-sm text-[#fcfdff] placeholder:text-[var(--mute)]
+                className="flex-1 sm:w-72 h-11 px-4 rounded-xl text-sm text-[#fcfdff] placeholder:text-[var(--mute)]
                            bg-[#0a0a0c] focus:outline-none"
                 style={{ border: "1px solid rgba(255,255,255,0.14)" }}
               />
               <button
                 type="submit"
-                className="h-9 px-5 rounded-lg text-sm font-medium bg-[#fcfdff] text-black
+                className="h-11 px-5 rounded-xl text-sm font-medium bg-[#fcfdff] text-black
                            hover:bg-[#f1f7fe] transition-colors whitespace-nowrap shrink-0"
               >
-                Read →
+                Open paper →
               </button>
             </form>
+
+            <div className="flex items-center gap-2 text-[#464a4d] text-sm select-none">
+              <span className="hidden sm:block">or</span>
+            </div>
+
+            <NavAuth variant="hero" />
           </div>
         </div>
       </section>
