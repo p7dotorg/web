@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { annotations, papers } from "@/db/schema"
 import { fetchPaper } from "@/lib/arxiv"
+import { getSessionFromRequest } from "@/lib/session"
 import { eq } from "drizzle-orm"
 
 export async function GET(
@@ -22,9 +23,14 @@ export async function POST(
   { params }: { params: Promise<{ arxivId: string }> }
 ) {
   const { arxivId } = await params
-  const { anchorText, anchorStart, anchorEnd, body, authorName, authorId } = await req.json()
+  const session = await getSessionFromRequest(req)
+  const body_data = await req.json()
+  const { anchorText, anchorStart, anchorEnd, body } = body_data
 
-  if (!anchorText || !body || !authorName?.trim()) {
+  const resolvedName = session?.name ?? body_data.authorName
+  const resolvedId = session?.email ?? body_data.authorId
+
+  if (!anchorText || !body || !resolvedName?.trim()) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 })
   }
 
@@ -41,8 +47,8 @@ export async function POST(
     anchorStart,
     anchorEnd,
     body,
-    authorId: authorId ?? "anon",
-    authorName: authorName.trim(),
+    authorId: resolvedId ?? "anon",
+    authorName: resolvedName.trim(),
   }).returning()
 
   return NextResponse.json(row, { status: 201 })

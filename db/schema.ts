@@ -27,6 +27,15 @@ export const annotations = pgTable("annotations", {
   index("annotations_paper_idx").on(t.paperId),
 ])
 
+export const otpCodes = pgTable("otp_codes", {
+  id:        uuid("id").primaryKey().defaultRandom(),
+  email:     text("email").notNull(),
+  code:      text("code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used:      integer("used").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
 export const upvotes = pgTable("upvotes", {
   id:           uuid("id").primaryKey().defaultRandom(),
   annotationId: uuid("annotation_id").notNull().references(() => annotations.id, { onDelete: "cascade" }),

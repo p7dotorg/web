@@ -4,6 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react"
 import Link from "next/link"
 import katex from "katex"
 import "katex/dist/katex.min.css"
+import AuthModal, { AuthUser } from "./AuthModal"
 
 interface Annotation {
   id: string
@@ -56,18 +57,20 @@ export default function PaperReader({
   const [active, setActive] = useState<Annotation | null>(null)
   const [draftBody, setDraftBody] = useState("")
   const [posting, setPosting] = useState(false)
-  const [authorName, setAuthorName] = useState("")
-  const [askingName, setAskingName] = useState(false)
+  const [sessionUser, setSessionUser] = useState<AuthUser | null>(null)
+  const [showAuth, setShowAuth] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem("p7_author_name")
-    if (stored) setAuthorName(stored)
+    fetch("/api/auth/session")
+      .then(r => r.json())
+      .then(u => { if (u?.email) setSessionUser(u) })
+      .catch(() => {})
   }, [])
 
-  const saveAuthorName = (name: string) => {
-    setAuthorName(name)
-    localStorage.setItem("p7_author_name", name)
+  const logout = async () => {
+    await fetch("/api/auth/session", { method: "DELETE" })
+    setSessionUser(null)
   }
 
   const handleContentClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -95,25 +98,16 @@ export default function PaperReader({
     setActive(null)
   }, [])
 
-  const submit = async (nameOverride?: string) => {
-    if (!selection || !draftBody.trim()) return
-    const name = nameOverride ?? authorName
-    if (!name.trim()) { setAskingName(true); return }
+  const postAnnotation = async (currentSelection: Selection, body: string) => {
     setPosting(true)
     const res = await fetch(`/api/papers/${paper.arxivId}/annotations`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        anchorText: selection.text,
-        anchorStart: selection.start,
-        anchorEnd: selection.end,
-        body: draftBody,
-        authorName: name.trim(),
-        authorId: localStorage.getItem("p7_author_id") ?? (() => {
-          const id = crypto.randomUUID()
-          localStorage.setItem("p7_author_id", id)
-          return id
-        })(),
+        anchorText: currentSelection.text,
+        anchorStart: currentSelection.start,
+        anchorEnd: currentSelection.end,
+        body,
       }),
     })
     if (res.ok) {
@@ -122,8 +116,23 @@ export default function PaperReader({
     }
     setDraftBody("")
     setSelection(null)
-    setAskingName(false)
+    setShowAuth(false)
     setPosting(false)
+  }
+
+  const submit = async () => {
+    if (!selection || !draftBody.trim()) return
+    if (!sessionUser) { setShowAuth(true); return }
+    await postAnnotation(selection, draftBody)
+  }
+
+  const handleAuthSuccess = (user: AuthUser) => {
+    setSessionUser(user)
+    setShowAuth(false)
+    if (draftBody.trim() && selection) {
+      // use captured selection/draftBody before state clears
+      postAnnotation(selection, draftBody)
+    }
   }
 
   const upvote = async (id: string) => {
@@ -182,7 +191,24 @@ export default function PaperReader({
               {c}
             </Link>
           ))}
-          <span className="text-[11px] text-[#888e90]">{paper.arxivId}</span>
+          <span className="text-[11px] text-[#888e90] hidden sm:inline">{paper.arxivId}</span>
+          {sessionUser ? (
+            <button
+              onClick={logout}
+              className="text-[11px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
+              title={`Signed in as ${sessionUser.email}`}
+            >
+              {sessionUser.name} ·<span className="ml-1">out</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => { setShowAuth(true) }}
+              className="text-[11px] px-3 py-1 rounded-lg text-[#888e90] hover:text-[#fcfdff] transition-colors"
+              style={{ border: "1px solid rgba(255,255,255,0.14)" }}
+            >
+              Sign in
+            </button>
+          )}
         </div>
       </header>
 
@@ -379,24 +405,11 @@ export default function PaperReader({
         >
           <p className="text-[11px] italic text-[#888e90] mb-3 line-clamp-2">"{selection.text}"</p>
 
-          {askingName ? (
-            /* Name prompt — shown once, then remembered */
-            <div className="space-y-2">
-              <p className="text-[12px] text-[#888e90]">What should we call you?</p>
-              <input
-                autoFocus
-                placeholder="Your name or handle"
-                className="w-full h-9 px-3 rounded-lg text-sm text-[#fcfdff] placeholder:text-[#464a4d] focus:outline-none"
-                style={{ background: "#06060a", border: "1px solid rgba(255,255,255,0.14)" }}
-                onKeyDown={e => {
-                  if (e.key === "Enter") {
-                    const val = (e.target as HTMLInputElement).value.trim()
-                    if (val) { saveAuthorName(val); submit(val) }
-                  }
-                }}
-              />
-              <p className="text-[10px] text-[#464a4d]">Saved locally. No account needed.</p>
-            </div>
+          {showAuth ? (
+            <AuthModal
+              onSuccess={handleAuthSuccess}
+              onCancel={() => { setShowAuth(false); setSelection(null) }}
+            />
           ) : (
             <>
               <textarea
@@ -407,22 +420,26 @@ export default function PaperReader({
                 className="w-full text-sm text-[#fcfdff] placeholder:text-[#464a4d] rounded-lg p-3 h-24 resize-none focus:outline-none"
                 style={{ background: "#06060a", border: "1px solid rgba(255,255,255,0.14)" }}
               />
-              {authorName && (
+              {sessionUser ? (
                 <p className="text-[10px] text-[#464a4d] mt-1">
-                  Posting as <span className="text-[#888e90]">{authorName}</span>
-                  <button onClick={() => { setAuthorName(""); localStorage.removeItem("p7_author_name") }} className="ml-2 hover:text-[#fcfdff] transition-colors">change</button>
+                  Posting as <span className="text-[#888e90]">{sessionUser.name}</span>
+                  <button onClick={logout} className="ml-2 hover:text-[#fcfdff] transition-colors">sign out</button>
+                </p>
+              ) : (
+                <p className="text-[10px] text-[#464a4d] mt-1">
+                  You&apos;ll sign in with email to post
                 </p>
               )}
               <div className="flex gap-2 mt-2">
                 <button
-                  onClick={() => submit()}
+                  onClick={submit}
                   disabled={posting || !draftBody.trim()}
                   className="flex-1 h-9 rounded-lg text-sm font-medium bg-[#fcfdff] text-black hover:bg-[#f1f7fe] disabled:opacity-30 transition-colors"
                 >
-                  {posting ? "Saving…" : "Annotate"}
+                  {posting ? "Saving…" : sessionUser ? "Annotate" : "Continue →"}
                 </button>
                 <button
-                  onClick={() => { setSelection(null); setAskingName(false) }}
+                  onClick={() => setSelection(null)}
                   className="px-4 h-9 text-[13px] text-[#888e90] hover:text-[#fcfdff] transition-colors rounded-lg"
                   style={{ border: "1px solid rgba(255,255,255,0.14)" }}
                 >
