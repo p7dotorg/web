@@ -22,14 +22,23 @@ export default function AuthModal({ onSuccess, onCancel }: Props) {
   const requestCode = async () => {
     if (!email.includes("@")) { setError("Enter a valid email"); return }
     setLoading(true); setError("")
-    const res = await fetch("/api/auth/otp/request", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    })
-    setLoading(false)
-    if (res.ok) setStep("code")
-    else setError("Failed to send code. Try again.")
+    try {
+      const res = await fetch("/api/auth/otp/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json().catch(() => ({}))
+      setLoading(false)
+      if (res.ok) {
+        setStep("code")
+      } else {
+        setError(data.detail ?? data.error ?? "Failed to send code. Try again.")
+      }
+    } catch {
+      setLoading(false)
+      setError("Network error. Check your connection.")
+    }
   }
 
   const verifyCode = async () => {
