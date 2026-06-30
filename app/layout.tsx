@@ -11,8 +11,14 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: "p7 — Annotate academic papers",
-  description: "Like Genius, but for papers.",
+  title: "paper7 — Annotate academic papers",
+  description: "Like Genius, but for papers. Marginalia for arXiv.",
+  metadataBase: new URL("https://paper7.org"),
+  openGraph: {
+    siteName: "paper7",
+    title: "paper7 — Annotate academic papers",
+    description: "Like Genius, but for papers. Marginalia for arXiv.",
+  },
 }
 
 async function MaybeClerk({ children }: { children: React.ReactNode }) {
