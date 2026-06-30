@@ -40,10 +40,13 @@ export function normalizeDoi(s: string): string {
 export async function fetchFromCrossref(doi: string): Promise<PaperMeta | null> {
   try {
     const res = await fetch(
-      `https://api.crossref.org/works/${encodeURIComponent(doi)}`,
+      `https://api.crossref.org/works/${doi}`,
       {
-        headers: { "User-Agent": "paper7/1.0 (mailto:hi@paper7.org)" },
-        next: { revalidate: 86400 },
+        headers: {
+          "User-Agent": "paper7/1.0 (mailto:hi@paper7.org)",
+          "Accept": "application/json",
+        },
+        cache: "no-store",
       }
     )
     if (!res.ok) return null
