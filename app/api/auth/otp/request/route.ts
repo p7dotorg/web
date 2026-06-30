@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     if (resend) {
       const result = await resend.emails.send({
-        from: "paper7 <onboarding@resend.dev>",
+        from: "paper7 <noreply@paper7.org>",
         to: email,
         subject: `Your p7 code: ${code}`,
         html: `<p style="font-family:monospace;font-size:32px;letter-spacing:8px"><b>${code}</b></p><p>Valid for 10 minutes.</p>`,
