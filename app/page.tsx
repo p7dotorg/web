@@ -204,10 +204,9 @@ export default async function Home() {
             </p>
             <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
               {topAnnotations.map((a: any, i: number) => (
-                <Link
+                <div
                   key={a.id}
-                  href={`/${a.paperId}`}
-                  className="group flex gap-5 p-5 transition-colors duration-150"
+                  className="group flex gap-5 p-5"
                   style={{
                     background: i % 2 === 0 ? "#0a0a0c" : "#000",
                     borderBottom: i < topAnnotations.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
@@ -217,7 +216,7 @@ export default async function Home() {
                     <div className="text-xs text-[var(--charcoal)]">▲</div>
                     <div className="text-[11px] text-[var(--mute)] mt-0.5">{a.upvotes}</div>
                   </div>
-                  <div className="flex-1 min-w-0 space-y-1">
+                  <Link href={`/annotations/${a.id}`} className="flex-1 min-w-0 space-y-1 block">
                     <p className="text-[11px] italic text-[var(--charcoal)] line-clamp-1">
                       "{a.anchorText}"
                     </p>
@@ -225,12 +224,19 @@ export default async function Home() {
                     <div className="flex items-center gap-2 pt-0.5">
                       <span className="text-[11px] text-[var(--ash)]">{a.authorName}</span>
                       <span className="text-[var(--stone)] opacity-30">·</span>
-                      <span className="text-[11px] text-[var(--ash)] group-hover:text-[var(--charcoal)] transition-colors truncate">
+                      <span className="text-[11px] text-[var(--ash)] truncate">
                         {a.paperTitle}
                       </span>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                  <Link
+                    href={`/${a.paperId}`}
+                    className="shrink-0 self-center text-[11px] text-[#464a4d] hover:text-[#888e90] transition-colors hidden group-hover:block"
+                    title="Open paper"
+                  >
+                    paper →
+                  </Link>
+                </div>
               ))}
             </div>
           </section>

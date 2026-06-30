@@ -290,12 +290,22 @@ export default function PaperReader({
                   <p className="text-[13px] text-[rgba(252,253,255,0.86)] leading-relaxed line-clamp-3">{ann.body}</p>
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-[11px] text-[#464a4d]">{ann.authorName}</span>
-                    <button
-                      onClick={e => { e.stopPropagation(); upvote(ann.id) }}
-                      className="text-[11px] text-[#888e90] hover:text-[#fcfdff] transition-colors flex items-center gap-1"
-                    >
-                      ▲ {ann.upvotes}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={e => { e.stopPropagation(); upvote(ann.id) }}
+                        className="text-[11px] text-[#888e90] hover:text-[#fcfdff] transition-colors flex items-center gap-1"
+                      >
+                        ▲ {ann.upvotes}
+                      </button>
+                      <Link
+                        href={`/annotations/${ann.id}`}
+                        onClick={e => e.stopPropagation()}
+                        className="text-[11px] text-[#464a4d] hover:text-[#888e90] transition-colors"
+                        title="Open annotation page"
+                      >
+                        ↗
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}
