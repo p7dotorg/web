@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import type { SearchResult } from "@/app/api/search/route"
 
 const CATEGORIES = [
   "cs.AI", "cs.LG", "cs.CL", "cs.CV", "cs.NE",
@@ -19,7 +20,10 @@ export default function CommandPalette() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [selected, setSelected] = useState(0)
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [searching, setSearching] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -38,6 +42,7 @@ export default function CommandPalette() {
     if (open) {
       setQuery("")
       setSelected(0)
+      setSearchResults([])
       setTimeout(() => inputRef.current?.focus(), 50)
     }
   }, [open])
@@ -61,11 +66,39 @@ export default function CommandPalette() {
     return q.trim().replace(/v\d+$/, "")
   }
 
+  const isDirectInput = (q: string) => isArxivId(q) || isUrl(q) || isDoi(q)
+
+  const doSearch = useCallback((q: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (q.length < 2 || isDirectInput(q)) {
+      setSearchResults([])
+      setSearching(false)
+      return
+    }
+    setSearching(true)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`)
+        const data: SearchResult[] = await res.json()
+        setSearchResults(data)
+      } catch {
+        setSearchResults([])
+      } finally {
+        setSearching(false)
+      }
+    }, 300)
+  }, [])
+
+  useEffect(() => {
+    doSearch(query)
+    setSelected(0)
+  }, [query, doSearch])
+
   const catResults = query.length >= 2
     ? CATEGORIES.filter(c => c.toLowerCase().includes(query.toLowerCase()))
     : []
 
-  const items: Array<{ label: string; hint: string; action: () => void }> = []
+  const items: Array<{ label: string; hint: string; sublabel?: string; action: () => void }> = []
 
   if (query) {
     if (isDoi(query)) {
@@ -83,21 +116,45 @@ export default function CommandPalette() {
         hint: "arXiv",
         action: () => router.push(`/${resolveId(query)}`),
       })
+    } else if (searchResults.length > 0) {
+      searchResults.forEach(r => {
+        items.push({
+          label: r.title,
+          sublabel: r.authors.split(",")[0] + (r.authors.includes(",") ? " et al." : ""),
+          hint: r.source === "local"
+            ? `${r.annotationCount > 0 ? `▲ ${r.annotationCount} notes` : "annotated"}`
+            : "arXiv",
+          action: () => router.push(r.id.startsWith("10.") ? `/doi/${r.id}` : `/${r.id}`),
+        })
+      })
+    } else if (searching) {
+      items.push({ label: "Searching…", hint: "", action: () => {} })
+    } else {
+      catResults.forEach(c => {
+        items.push({
+          label: `Browse ${c}`,
+          hint: "category",
+          action: () => router.push(`/category/${encodeURIComponent(c)}`),
+        })
+      })
+      if (!items.length) {
+        items.push({
+          label: `Open "${query}" as arXiv ID`,
+          hint: "press enter",
+          action: () => router.push(`/${query.trim()}`),
+        })
+      }
     }
+
     catResults.forEach(c => {
-      items.push({
-        label: `Browse ${c}`,
-        hint: "category",
-        action: () => router.push(`/category/${encodeURIComponent(c)}`),
-      })
+      if (!items.find(i => i.label === `Browse ${c}`)) {
+        items.push({
+          label: `Browse ${c}`,
+          hint: "category",
+          action: () => router.push(`/category/${encodeURIComponent(c)}`),
+        })
+      }
     })
-    if (!items.length) {
-      items.push({
-        label: `Search "${query}"`,
-        hint: "press enter to open as arXiv ID",
-        action: () => router.push(`/${query.trim()}`),
-      })
-    }
   } else {
     SHORTCUTS.forEach(s => {
       items.push({
@@ -145,11 +202,14 @@ export default function CommandPalette() {
           <input
             ref={inputRef}
             value={query}
-            onChange={e => { setQuery(e.target.value); setSelected(0) }}
+            onChange={e => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="arXiv ID, DOI, or category…"
+            placeholder="Search papers, arXiv ID, DOI…"
             className="flex-1 h-12 text-sm text-[#fcfdff] placeholder:text-[#464a4d] bg-transparent focus:outline-none"
           />
+          {searching && (
+            <span className="text-[11px] text-[#464a4d]">searching…</span>
+          )}
           <kbd
             className="text-[10px] text-[#464a4d] px-1.5 py-0.5 rounded"
             style={{ border: "1px solid rgba(255,255,255,0.10)" }}
@@ -167,7 +227,12 @@ export default function CommandPalette() {
               className="w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors"
               style={{ background: i === selected ? "rgba(255,255,255,0.06)" : "transparent" }}
             >
-              <span className="text-[13px] text-[#fcfdff]">{item.label}</span>
+              <div className="min-w-0 flex-1">
+                <div className="text-[13px] text-[#fcfdff] truncate">{item.label}</div>
+                {item.sublabel && (
+                  <div className="text-[11px] text-[#464a4d] truncate mt-0.5">{item.sublabel}</div>
+                )}
+              </div>
               <span className="text-[11px] text-[#464a4d] ml-4 shrink-0">{item.hint}</span>
             </button>
           ))}
