@@ -42,6 +42,12 @@ export default function SiteNav({ right }: Props) {
           >
             feed
           </Link>
+          <Link
+            href="/feed"
+            className="text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors hidden sm:inline"
+          >
+            following
+          </Link>
         </div>
 
         {/* Right */}

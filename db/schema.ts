@@ -74,3 +74,13 @@ export const upvotes = pgTable("upvotes", {
   annotationId: uuid("annotation_id").notNull().references(() => annotations.id, { onDelete: "cascade" }),
   userId:       text("user_id").notNull(),
 })
+
+export const follows = pgTable("follows", {
+  id:          uuid("id").primaryKey().defaultRandom(),
+  followerId:  text("follower_id").notNull(),  // session email
+  followingId: text("following_id").notNull(), // authorId of who is being followed
+  createdAt:   timestamp("created_at").notNull().defaultNow(),
+}, (t) => [
+  index("follows_follower_idx").on(t.followerId),
+  index("follows_following_idx").on(t.followingId),
+])

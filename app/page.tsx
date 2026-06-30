@@ -6,6 +6,7 @@ import Link from "next/link"
 import NavAuth from "@/components/NavAuth"
 import CommandPalette from "@/components/CommandPalette"
 import SearchTrigger from "@/components/SearchTrigger"
+import ContributorsSection from "@/components/ContributorsSection"
 
 async function search(formData: FormData) {
   "use server"
@@ -257,42 +258,7 @@ export default async function Home() {
 
         {/* Top contributors */}
         {topContributors.length > 0 && (
-          <section>
-            <p className="text-[10px] font-medium tracking-widest text-[var(--charcoal)] uppercase mb-6">
-              Top contributors
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {topContributors.map((c, i) => (
-                <div
-                  key={c.authorId}
-                  className="flex items-center gap-3 rounded-xl px-4 py-3"
-                  style={{ background: "#0a0a0c", border: "1px solid rgba(255,255,255,0.06)" }}
-                >
-                  {/* Rank */}
-                  <span className="text-[11px] text-[var(--charcoal)] w-4 shrink-0 tabular-nums">
-                    {i + 1}
-                  </span>
-                  {/* Avatar */}
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-black shrink-0"
-                    style={{ background: "#fcfdff" }}
-                  >
-                    {c.authorName[0].toUpperCase()}
-                  </div>
-                  {/* Info */}
-                  <div className="min-w-0">
-                    <p className="text-[12px] font-medium text-[#fcfdff] truncate">{c.authorName}</p>
-                    <p className="text-[11px] text-[var(--ash)]">
-                      {c.annotationCount} note{c.annotationCount !== 1 ? "s" : ""}
-                      {c.totalUpvotes > 0 && (
-                        <span className="text-[var(--charcoal)]"> · ▲{c.totalUpvotes}</span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+          <ContributorsSection contributors={topContributors} />
         )}
 
         {/* Empty state */}
