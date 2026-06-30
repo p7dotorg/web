@@ -24,19 +24,20 @@ export async function POST(
   try {
     const { id } = await params
     const session = await getSessionFromRequest(req)
-    const { body, authorName: bodyName } = await req.json()
+    if (!session?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
-    const resolvedName = session?.name ?? bodyName
-    const resolvedId = session?.email ?? "anon"
+    const { body } = await req.json()
 
-    if (!body?.trim() || !resolvedName?.trim()) {
-      return NextResponse.json({ error: "Missing body or author" }, { status: 400 })
+    if (!body?.trim()) {
+      return NextResponse.json({ error: "Missing body" }, { status: 400 })
     }
 
     const [row] = await db.insert(comments).values({
       annotationId: id,
-      authorId: resolvedId,
-      authorName: resolvedName.trim(),
+      authorId: session.email,
+      authorName: session.name,
       body: body.trim(),
     }).returning()
 

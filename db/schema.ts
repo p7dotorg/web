@@ -73,7 +73,9 @@ export const upvotes = pgTable("upvotes", {
   id:           uuid("id").primaryKey().defaultRandom(),
   annotationId: uuid("annotation_id").notNull().references(() => annotations.id, { onDelete: "cascade" }),
   userId:       text("user_id").notNull(),
-})
+}, (t) => [
+  index("upvotes_unique_idx").on(t.annotationId, t.userId),
+])
 
 export const follows = pgTable("follows", {
   id:          uuid("id").primaryKey().defaultRandom(),

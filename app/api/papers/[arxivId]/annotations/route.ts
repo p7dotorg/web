@@ -28,8 +28,17 @@ export async function POST(
   const body_data = await req.json()
   const { anchorText, anchorStart, anchorEnd, body } = body_data
 
-  const resolvedName = session?.name ?? body_data.authorName
-  const resolvedId = session?.email ?? body_data.authorId
+  // Allow AI ingest via secret header; otherwise require session
+  const isIngest = req.headers.get("x-ingest-secret") === process.env.INGEST_SECRET
+    && !!process.env.INGEST_SECRET
+
+  if (!session && !isIngest) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  // Session always wins; ingest can supply its own authorName/authorId
+  const resolvedName = session?.name ?? (isIngest ? body_data.authorName : null)
+  const resolvedId   = session?.email ?? (isIngest ? body_data.authorId  : null)
 
   if (!anchorText || !body || !resolvedName?.trim()) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 })
