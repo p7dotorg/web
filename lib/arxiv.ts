@@ -33,6 +33,20 @@ function cleanText(t: string): string {
     .trim()
 }
 
+function stripNoisyElements(html: string): string {
+  return html
+    // Remove figures (algorithm environments, images, captions)
+    .replace(/<figure[\s\S]*?<\/figure>/gi, "")
+    // Remove tables (algorithm pseudocode is often in ltx_tabular)
+    .replace(/<table[\s\S]*?<\/table>/gi, "")
+    // Remove inline code / algorithm listings
+    .replace(/<pre[\s\S]*?<\/pre>/gi, "")
+    // Remove footnotes
+    .replace(/<span[^>]*class="[^"]*ltx_note[^"]*"[\s\S]*?<\/span>/gi, "")
+}
+
+const BROKEN_TEXT_RE = /superscript|subscript|ltx_|\\mathrm|\\mathbb|\\tilde|\\ell/i
+
 function extractSections(html: string): string {
   // Skip title/author/abstract header — target only <section> content
   const sectionMatches = [...html.matchAll(/<section[^>]*>([\s\S]*?)<\/section>/g)]
@@ -40,8 +54,9 @@ function extractSections(html: string): string {
 
   const blocks: string[] = []
 
-  for (const [, sectionHtml] of sectionMatches) {
-    // Skip nested sections (they'll appear as their own top-level match)
+  for (const [, rawSectionHtml] of sectionMatches) {
+    const sectionHtml = stripNoisyElements(rawSectionHtml)
+
     // Extract heading
     const headingMatch = sectionHtml.match(/<h[2-4][^>]*>([\s\S]*?)<\/h[2-4]>/)
     if (headingMatch) {
@@ -51,12 +66,12 @@ function extractSections(html: string): string {
       }
     }
 
-    // Extract paragraphs
+    // Extract paragraphs — skip ones that contain algorithm artifacts
     const paraMatches = [...sectionHtml.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/g)]
     for (const [, paraHtml] of paraMatches) {
       const withLatex = mathToLatex(paraHtml)
       const text = cleanText(htmlToText(withLatex))
-      if (text.length > 40) blocks.push(text)
+      if (text.length > 40 && !BROKEN_TEXT_RE.test(text)) blocks.push(text)
     }
   }
 
