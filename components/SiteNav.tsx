@@ -48,6 +48,12 @@ export default function SiteNav({ right }: Props) {
           >
             following
           </Link>
+          <Link
+            href="/opensource"
+            className="text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors hidden sm:inline"
+          >
+            open source
+          </Link>
         </div>
 
         {/* Right */}
