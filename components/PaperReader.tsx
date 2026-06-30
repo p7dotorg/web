@@ -6,6 +6,7 @@ import katex from "katex"
 import "katex/dist/katex.min.css"
 import AuthModal, { AuthUser } from "./AuthModal"
 import SavePaperButton from "./SavePaperButton"
+import SiteFooter from "./SiteFooter"
 
 interface Annotation {
   id: string
@@ -417,6 +418,8 @@ export default function PaperReader({
           </div>
         </aside>
       </div>
+
+      <SiteFooter />
 
       {/* Active annotation — bottom sheet (mobile) + highlight sync */}
       {active && (

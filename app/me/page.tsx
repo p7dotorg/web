@@ -6,6 +6,7 @@ import { eq, desc } from "drizzle-orm"
 import { getSession } from "@/lib/session"
 import SavePaperButton from "@/components/SavePaperButton"
 import SiteNav from "@/components/SiteNav"
+import SiteFooter from "@/components/SiteFooter"
 
 export const dynamic = "force-dynamic"
 
@@ -177,6 +178,7 @@ export default async function MePage() {
         )}
 
       </div>
+      <SiteFooter />
     </div>
   )
 }

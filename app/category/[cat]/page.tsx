@@ -2,6 +2,7 @@ import { db } from "@/db"
 import { papers, annotations } from "@/db/schema"
 import { desc, eq, like, sql } from "drizzle-orm"
 import Link from "next/link"
+import SiteFooter from "@/components/SiteFooter"
 
 export default async function CategoryPage({ params }: { params: Promise<{ cat: string }> }) {
   const { cat } = await params
@@ -67,6 +68,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ cat: 
           ))}
         </div>
       </div>
+      <SiteFooter />
     </div>
   )
 }

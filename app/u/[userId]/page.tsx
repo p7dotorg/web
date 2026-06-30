@@ -3,6 +3,7 @@ import { annotations, papers, follows } from "@/db/schema"
 import { eq, desc, inArray } from "drizzle-orm"
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
+import SiteFooter from "@/components/SiteFooter"
 import FollowButton from "@/components/FollowButton"
 import { getSession } from "@/lib/session"
 import { notFound } from "next/navigation"
@@ -153,6 +154,7 @@ export default async function UserProfilePage({
           ))}
         </div>
       </div>
+      <SiteFooter />
     </div>
   )
 }

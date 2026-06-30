@@ -5,6 +5,7 @@ import { follows, annotations, papers } from "@/db/schema"
 import { eq, desc, inArray } from "drizzle-orm"
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
+import SiteFooter from "@/components/SiteFooter"
 import { getSession } from "@/lib/session"
 
 export const dynamic = "force-dynamic"
@@ -133,6 +134,7 @@ export default async function FeedPage() {
           </div>
         )}
       </div>
+      <SiteFooter />
     </div>
   )
 }

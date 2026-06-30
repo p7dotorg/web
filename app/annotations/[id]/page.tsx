@@ -7,6 +7,7 @@ import { getSession } from "@/lib/session"
 import AnnotationComments from "@/components/AnnotationComments"
 import SavePaperButton from "@/components/SavePaperButton"
 import SiteNav from "@/components/SiteNav"
+import SiteFooter from "@/components/SiteFooter"
 import { userPapers } from "@/db/schema"
 
 export default async function AnnotationPage({
@@ -200,6 +201,7 @@ export default async function AnnotationPage({
           </div>
         )}
       </div>
+      <SiteFooter />
     </div>
   )
 }
