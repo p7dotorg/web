@@ -7,6 +7,7 @@ interface Comment {
   id: string
   authorName: string
   body: string
+  isAi: number
   createdAt: string
 }
 
@@ -31,7 +32,7 @@ export default function AnnotationComments({ annotationId, initialComments, sess
     })
     if (res.ok) {
       const c = await res.json()
-      setComments(prev => [...prev, { ...c, createdAt: c.createdAt }])
+      setComments(prev => [...prev, c])
       setDraft("")
     }
     setPosting(false)
@@ -40,20 +41,43 @@ export default function AnnotationComments({ annotationId, initialComments, sess
   const fmt = (d: string) =>
     new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })
 
+  const aiComments = comments.filter(c => c.isAi)
+  const humanComments = comments.filter(c => !c.isAi)
+  const total = comments.length
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <p className="text-[10px] font-medium tracking-widest text-[#464a4d] uppercase">
-        Discussion ({comments.length})
+        Discussion ({total})
       </p>
 
-      {comments.length === 0 && !session && (
-        <p className="text-[13px] text-[#464a4d]">
-          No comments yet. Sign in to start the discussion.
-        </p>
-      )}
+      {/* AI seed comment — pinned at top */}
+      {aiComments.map(c => (
+        <div
+          key={c.id}
+          className="rounded-xl p-4 space-y-2"
+          style={{
+            background: "rgba(255,197,61,0.04)",
+            border: "1px solid rgba(255,197,61,0.18)",
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="text-[9px] font-semibold tracking-widest px-2 py-0.5 rounded-full uppercase"
+              style={{ background: "rgba(255,197,61,0.12)", color: "#ffc53d", border: "1px solid rgba(255,197,61,0.2)" }}
+            >
+              AI
+            </span>
+            <span className="text-[11px] text-[#888e90]">paper7</span>
+            <span className="text-[11px] text-[#464a4d]">·</span>
+            <span className="text-[11px] text-[#464a4d]">{fmt(c.createdAt)}</span>
+          </div>
+          <p className="text-[13px] text-[rgba(252,253,255,0.82)] leading-relaxed">{c.body}</p>
+        </div>
+      ))}
 
-      {/* Comment list */}
-      {comments.map(c => (
+      {/* Human comments */}
+      {humanComments.map(c => (
         <div key={c.id} className="flex gap-3">
           <div
             className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[11px] font-medium text-black mt-0.5"
@@ -71,9 +95,15 @@ export default function AnnotationComments({ annotationId, initialComments, sess
         </div>
       ))}
 
+      {total === 0 && !session && (
+        <p className="text-[13px] text-[#464a4d]">
+          No discussion yet. Sign in to start one.
+        </p>
+      )}
+
       {/* Comment input */}
       {session ? (
-        <div className="flex gap-3 pt-2">
+        <div className="flex gap-3 pt-1">
           <div
             className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[11px] font-medium text-black mt-1"
             style={{ background: "#fcfdff" }}
@@ -84,7 +114,7 @@ export default function AnnotationComments({ annotationId, initialComments, sess
             <textarea
               value={draft}
               onChange={e => setDraft(e.target.value)}
-              placeholder="Add a comment…"
+              placeholder="Reply to the discussion…"
               rows={2}
               className="w-full text-sm text-[#fcfdff] placeholder:text-[#464a4d] rounded-xl px-3 py-2.5 resize-none focus:outline-none"
               style={{ background: "#0a0a0c", border: "1px solid rgba(255,255,255,0.14)" }}
@@ -104,7 +134,7 @@ export default function AnnotationComments({ annotationId, initialComments, sess
         </div>
       ) : (
         <p className="text-[12px] text-[#464a4d] pt-1">
-          <a href="/" className="text-[#888e90] hover:text-[#fcfdff] transition-colors">Sign in</a> to comment
+          <a href="/" className="text-[#888e90] hover:text-[#fcfdff] transition-colors">Sign in</a> to join the discussion
         </p>
       )}
     </div>

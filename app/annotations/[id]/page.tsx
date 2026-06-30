@@ -133,7 +133,10 @@ export default async function AnnotationPage({
         <AnnotationComments
           annotationId={id}
           initialComments={initialComments.map(c => ({
-            ...c,
+            id: c.id,
+            authorName: c.authorName,
+            body: c.body,
+            isAi: c.isAi,
             createdAt: c.createdAt.toISOString(),
           }))}
           session={session}

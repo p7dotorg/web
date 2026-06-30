@@ -54,6 +54,7 @@ export const comments = pgTable("comments", {
   authorId:     text("author_id").notNull(),
   authorName:   text("author_name").notNull(),
   body:         text("body").notNull(),
+  isAi:         integer("is_ai").notNull().default(0),
   createdAt:    timestamp("created_at").notNull().defaultNow(),
 }, (t) => [
   index("comments_annotation_idx").on(t.annotationId),

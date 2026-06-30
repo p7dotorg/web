@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
-import { annotations, papers } from "@/db/schema"
+import { annotations, papers, comments } from "@/db/schema"
 import { fetchPaper } from "@/lib/arxiv"
 import { getSessionFromRequest } from "@/lib/session"
-import { eq } from "drizzle-orm"
+import { generateSeedComment } from "@/lib/ai"
+import { eq, desc } from "drizzle-orm"
 
 export async function GET(
   _req: NextRequest,
@@ -14,7 +15,7 @@ export async function GET(
     .select()
     .from(annotations)
     .where(eq(annotations.paperId, arxivId))
-    .orderBy(annotations.upvotes)
+    .orderBy(desc(annotations.upvotes))
   return NextResponse.json(rows)
 }
 
@@ -34,11 +35,15 @@ export async function POST(
     return NextResponse.json({ error: "Missing fields" }, { status: 400 })
   }
 
+  let paperTitle = arxivId
   const existing = await db.select().from(papers).where(eq(papers.arxivId, arxivId)).limit(1)
   if (!existing.length) {
     const meta = await fetchPaper(arxivId)
     if (!meta) return NextResponse.json({ error: "Paper not found" }, { status: 404 })
     await db.insert(papers).values(meta).onConflictDoNothing()
+    paperTitle = meta.title
+  } else {
+    paperTitle = existing[0].title
   }
 
   const [row] = await db.insert(annotations).values({
@@ -50,6 +55,20 @@ export async function POST(
     authorId: resolvedId ?? "anon",
     authorName: resolvedName.trim(),
   }).returning()
+
+  // Fire AI seed comment asynchronously — don't block the response
+  generateSeedComment({ paperTitle, anchorText, annotationBody: body })
+    .then(async (seedText) => {
+      if (!seedText) return
+      await db.insert(comments).values({
+        annotationId: row.id,
+        authorId: "ai",
+        authorName: "paper7 AI",
+        body: seedText,
+        isAi: 1,
+      })
+    })
+    .catch(err => console.error("seed comment failed:", err))
 
   return NextResponse.json(row, { status: 201 })
 }
