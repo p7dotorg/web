@@ -74,6 +74,7 @@ async function getTopAnnotations() {
         id: annotations.id,
         body: annotations.body,
         anchorText: annotations.anchorText,
+        authorId: annotations.authorId,
         authorName: annotations.authorName,
         upvotes: annotations.upvotes,
         paperId: annotations.paperId,
@@ -236,7 +237,7 @@ export default async function Home() {
                     </p>
                     <p className="text-sm text-[var(--body)] leading-relaxed line-clamp-2">{a.body}</p>
                     <div className="flex items-center gap-2 pt-0.5">
-                      <span className="text-[11px] text-[var(--ash)]">{a.authorName}</span>
+                      <Link href={`/u/${encodeURIComponent(a.authorId)}`} className="text-[11px] text-[var(--ash)] hover:text-[#fcfdff] transition-colors" onClick={e => e.stopPropagation()}>{a.authorName}</Link>
                       <span className="text-[var(--stone)] opacity-30">·</span>
                       <span className="text-[11px] text-[var(--ash)] truncate">
                         {a.paperTitle}

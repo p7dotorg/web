@@ -63,16 +63,18 @@ export default function ContributorsSection({ contributors }: { contributors: Co
               <span className="text-[11px] text-[var(--charcoal)] w-4 shrink-0 tabular-nums">
                 {i + 1}
               </span>
-              {/* Avatar */}
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-black shrink-0"
+              {/* Avatar → profile */}
+              <a href={`/u/${encodeURIComponent(c.authorId)}`}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-black shrink-0 hover:opacity-80 transition-opacity"
                 style={{ background: "#fcfdff" }}
               >
                 {c.authorName[0].toUpperCase()}
-              </div>
+              </a>
               {/* Info */}
               <div className="min-w-0 flex-1">
-                <p className="text-[12px] font-medium text-[#fcfdff] truncate">{c.authorName}</p>
+                <a href={`/u/${encodeURIComponent(c.authorId)}`}
+                  className="text-[12px] font-medium text-[#fcfdff] truncate hover:underline block"
+                >{c.authorName}</a>
                 <p className="text-[11px] text-[var(--ash)]">
                   {c.annotationCount} note{c.annotationCount !== 1 ? "s" : ""}
                   {c.totalUpvotes > 0 && (
