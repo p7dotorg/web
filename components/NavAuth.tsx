@@ -26,26 +26,28 @@ export default function NavAuth({ variant = "nav" }: { variant?: "nav" | "hero" 
   if (user) {
     if (variant === "hero") return null // hero slot disappears when logged in
     return (
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Mobile: avatar circle */}
+      <div className="flex items-center gap-2">
+        {/* Avatar → /me (all sizes) */}
         <Link
           href="/me"
-          className="sm:hidden w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-black"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-black shrink-0"
           style={{ background: "#fcfdff" }}
+          title={user.name}
         >
           {user.name[0].toUpperCase()}
         </Link>
-        {/* Desktop: name */}
+        {/* Name — desktop only */}
         <Link
           href="/me"
           className="hidden sm:inline text-[13px] font-medium text-[#fcfdff] hover:opacity-70 transition-opacity"
         >
           {user.name}
         </Link>
+        {/* Out — always visible */}
         <button
           onClick={logout}
-          className="hidden sm:inline h-8 px-3 rounded-lg text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
-          style={{ border: "1px solid rgba(255,255,255,0.14)" }}
+          className="h-8 px-3 rounded-lg text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
+          style={{ border: "1px solid rgba(255,255,255,0.10)" }}
         >
           out
         </button>

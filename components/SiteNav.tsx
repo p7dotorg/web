@@ -52,25 +52,27 @@ export default function SiteNav({ right }: Props) {
             <div className="w-8 h-8" />
           ) : user ? (
             <>
-              {/* Mobile: avatar circle → /me */}
+              {/* Avatar → /me (all sizes) */}
               <Link
                 href="/me"
-                className="sm:hidden w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-black"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-black shrink-0"
                 style={{ background: "#fcfdff" }}
+                title={user.name}
               >
                 {user.name[0].toUpperCase()}
               </Link>
-              {/* Desktop: name + out */}
+              {/* Name — desktop only */}
               <Link
                 href="/me"
                 className="hidden sm:inline text-[12px] font-medium text-[#888e90] hover:text-[#fcfdff] transition-colors"
               >
                 {user.name}
               </Link>
+              {/* Out — always visible */}
               <button
                 onClick={logout}
-                className="hidden sm:inline text-[11px] px-3 py-1 rounded-lg text-[#464a4d] hover:text-[#888e90] transition-colors"
-                style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                className="h-8 px-3 rounded-lg text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
+                style={{ border: "1px solid rgba(255,255,255,0.10)" }}
               >
                 out
               </button>
@@ -78,7 +80,7 @@ export default function SiteNav({ right }: Props) {
           ) : (
             <button
               onClick={() => setOpen(true)}
-              className="text-[12px] px-3 sm:px-4 py-1.5 rounded-lg font-medium text-[#fcfdff] hover:bg-[rgba(255,255,255,0.06)] transition-colors"
+              className="h-8 px-3 sm:px-4 rounded-lg text-[12px] font-medium text-[#fcfdff] hover:bg-[rgba(255,255,255,0.06)] transition-colors"
               style={{ border: "1px solid rgba(255,255,255,0.14)" }}
             >
               Sign in
