@@ -305,9 +305,10 @@ export default function PaperReader({
                 </div>
               )}
               {annotations.map(ann => (
-                <div
+                <Link
                   key={ann.id}
-                  className="rounded-xl p-4 cursor-pointer transition-all duration-150 space-y-2"
+                  href={`/annotations/${ann.id}`}
+                  className="block rounded-xl p-4 transition-all duration-150 space-y-2 group"
                   style={{
                     background: active?.id === ann.id ? "#101012" : "#0a0a0c",
                     border: `1px solid ${active?.id === ann.id ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)"}`,
@@ -326,15 +327,11 @@ export default function PaperReader({
                         ▲ {ann.upvotes}
                       </button>
                     </div>
-                    <Link
-                      href={`/annotations/${ann.id}`}
-                      onClick={e => e.stopPropagation()}
-                      className="text-[11px] text-[#888e90] hover:text-[#fcfdff] transition-colors flex items-center gap-1"
-                    >
+                    <span className="text-[11px] text-[#464a4d] group-hover:text-[#888e90] transition-colors">
                       discuss →
-                    </Link>
+                    </span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 
