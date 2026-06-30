@@ -231,19 +231,28 @@ export default async function Home() {
                     <div className="text-xs text-[var(--charcoal)]">▲</div>
                     <div className="text-[11px] text-[var(--mute)] mt-0.5">{a.upvotes}</div>
                   </div>
-                  <Link href={`/annotations/${a.id}`} className="flex-1 min-w-0 space-y-1 block">
-                    <p className="text-[11px] italic text-[var(--charcoal)] line-clamp-1">
-                      "{a.anchorText}"
-                    </p>
-                    <p className="text-sm text-[var(--body)] leading-relaxed line-clamp-2">{a.body}</p>
-                    <div className="flex items-center gap-2 pt-0.5">
-                      <a href={`/u/${encodeURIComponent(a.authorId)}`} className="text-[11px] text-[var(--ash)] hover:text-[#fcfdff] transition-colors">{a.authorName}</a>
+                  <div className="flex-1 min-w-0 space-y-1">
+                    {/* Author → profile */}
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/u/${encodeURIComponent(a.authorId)}`}
+                        className="text-[11px] font-medium text-[var(--ash)] hover:text-[#fcfdff] transition-colors"
+                      >
+                        {a.authorName}
+                      </Link>
                       <span className="text-[var(--stone)] opacity-30">·</span>
-                      <span className="text-[11px] text-[var(--ash)] truncate">
-                        {a.paperTitle}
-                      </span>
+                      <span className="text-[11px] text-[var(--charcoal)] truncate">{a.paperTitle}</span>
                     </div>
-                  </Link>
+                    {/* Body → annotation */}
+                    <Link href={`/annotations/${a.id}`} className="block group/ann">
+                      <p className="text-[11px] italic text-[var(--charcoal)] line-clamp-1 mt-1">
+                        "{a.anchorText}"
+                      </p>
+                      <p className="text-sm text-[var(--body)] leading-relaxed line-clamp-2 mt-0.5 group-hover/ann:text-[#fcfdff] transition-colors">
+                        {a.body}
+                      </p>
+                    </Link>
+                  </div>
                   <Link
                     href={`/${a.paperId}`}
                     className="shrink-0 self-center text-[11px] text-[#464a4d] hover:text-[#888e90] transition-colors hidden group-hover:block"
