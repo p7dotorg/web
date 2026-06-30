@@ -1,4 +1,5 @@
 import SiteNav from "@/components/SiteNav"
+import Link from "next/link"
 
 const projects = [
   {
@@ -28,15 +29,6 @@ const projects = [
     language: "Python",
     badge: null,
   },
-  {
-    name: "web",
-    tagline: "This site",
-    description:
-      "The open-source codebase behind paper7.org. Built with Next.js App Router, Drizzle ORM, and Neon PostgreSQL. Social reading layer for arXiv — annotations, upvotes, following.",
-    url: "https://github.com/p7dotorg/web",
-    language: "TypeScript",
-    badge: null,
-  },
 ]
 
 const langColor: Record<string, string> = {
@@ -47,10 +39,10 @@ const langColor: Record<string, string> = {
 
 export default function OpenSourcePage() {
   return (
-    <div className="min-h-screen bg-black text-[#fcfdff]">
+    <div className="min-h-screen bg-black text-[#fcfdff] flex flex-col">
       <SiteNav />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-8 py-16">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-8 py-16">
 
         {/* Header */}
         <div className="mb-14">
@@ -134,7 +126,41 @@ export default function OpenSourcePage() {
             </a>
           ))}
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer
+        className="mt-auto px-4 sm:px-8 py-10"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-6">
+            <Link href="/" className="font-display text-sm font-medium text-[#fcfdff] hover:opacity-80 transition-opacity">
+              paper7
+            </Link>
+            <Link href="/" className="text-[12px] text-[#464a4d] hover:text-[#888e90] transition-colors">
+              papers
+            </Link>
+            <Link href="/feed" className="text-[12px] text-[#464a4d] hover:text-[#888e90] transition-colors">
+              following
+            </Link>
+            <Link href="/opensource" className="text-[12px] text-[#464a4d] hover:text-[#888e90] transition-colors">
+              open source
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/p7dotorg"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[12px] text-[#464a4d] hover:text-[#888e90] transition-colors"
+            >
+              GitHub
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
