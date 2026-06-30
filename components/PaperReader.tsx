@@ -192,36 +192,46 @@ export default function PaperReader({
         className="sticky top-0 z-20 flex items-center justify-between px-8 h-14"
         style={{ background: "#000", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
-        <a href="/" className="font-display text-lg font-medium text-[#fcfdff]">p7</a>
+        <div className="flex items-center gap-5">
+          <a href="/" className="font-display text-lg font-medium text-[#fcfdff]">paper7</a>
+          <a href="/" className="text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors hidden sm:inline">feed</a>
+        </div>
         <div className="flex items-center gap-3">
           {cats.slice(0, 2).map(c => (
             <Link
               key={c}
               href={`/category/${encodeURIComponent(c)}`}
-              className="text-[10px] px-2 py-0.5 rounded-full text-[#888e90] hover:text-[#fcfdff] transition-colors"
+              className="text-[10px] px-2 py-0.5 rounded-full text-[#888e90] hover:text-[#fcfdff] transition-colors hidden md:inline"
               style={{ border: "1px solid rgba(255,255,255,0.14)" }}
             >
               {c}
             </Link>
           ))}
-          <span className="text-[11px] text-[#888e90] hidden sm:inline">{paper.arxivId}</span>
           <SavePaperButton
             paperId={paper.arxivId}
             initialStatus={savedStatus}
             session={sessionUser}
           />
           {sessionUser ? (
-            <Link
-              href="/me"
-              className="text-[11px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
-              title={`Signed in as ${sessionUser.email}`}
-            >
-              {sessionUser.name} ·<span className="ml-1 text-[#464a4d]">me</span>
-            </Link>
+            <>
+              <Link
+                href="/me"
+                className="text-[12px] font-medium text-[#888e90] hover:text-[#fcfdff] transition-colors"
+              >
+                {sessionUser.name}
+              </Link>
+              <button
+                onClick={logout}
+                className="text-[11px] px-3 py-1 rounded-lg text-[#464a4d] hover:text-[#888e90] transition-colors"
+                style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                out
+              </button>
+            </>
           ) : (
             <button
               onClick={() => { setShowAuth(true) }}
-              className="text-[11px] px-3 py-1 rounded-lg text-[#888e90] hover:text-[#fcfdff] transition-colors"
+              className="text-[12px] px-4 py-1.5 rounded-lg font-medium text-[#fcfdff] hover:bg-[rgba(255,255,255,0.06)] transition-colors"
               style={{ border: "1px solid rgba(255,255,255,0.14)" }}
             >
               Sign in

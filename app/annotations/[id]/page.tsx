@@ -6,6 +6,7 @@ import Link from "next/link"
 import { getSession } from "@/lib/session"
 import AnnotationComments from "@/components/AnnotationComments"
 import SavePaperButton from "@/components/SavePaperButton"
+import SiteNav from "@/components/SiteNav"
 import { userPapers } from "@/db/schema"
 
 export default async function AnnotationPage({
@@ -66,25 +67,23 @@ export default async function AnnotationPage({
 
   return (
     <div className="min-h-screen bg-black text-[#fcfdff]">
-      <header
-        className="sticky top-0 z-20 flex items-center justify-between px-8 h-14"
-        style={{ background: "#000", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <Link href="/" className="font-display text-lg font-medium text-[#fcfdff]">paper7</Link>
-        <div className="flex items-center gap-3">
-          <SavePaperButton
-            paperId={row.paperId}
-            initialStatus={(savedPaper?.status as "reading" | "read" | "want_to_read") ?? null}
-            session={session}
-          />
-          <Link
-            href={`/${row.paperId}`}
-            className="text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
-          >
-            ← paper
-          </Link>
-        </div>
-      </header>
+      <SiteNav
+        right={
+          <>
+            <SavePaperButton
+              paperId={row.paperId}
+              initialStatus={(savedPaper?.status as "reading" | "read" | "want_to_read") ?? null}
+              session={session}
+            />
+            <Link
+              href={`/${row.paperId}`}
+              className="text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
+            >
+              ← paper
+            </Link>
+          </>
+        }
+      />
 
       <div className="max-w-2xl mx-auto px-6 py-16 space-y-10">
 

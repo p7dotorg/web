@@ -82,7 +82,7 @@ export default async function Home() {
         className="sticky top-0 z-40 flex items-center justify-between px-8 h-16"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "#000" }}
       >
-        <span className="font-display text-xl font-medium tracking-tight text-[#fcfdff]">p7</span>
+        <span className="font-display text-xl font-medium tracking-tight text-[#fcfdff]">paper7</span>
 
         <SearchTrigger />
 
