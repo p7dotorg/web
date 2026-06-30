@@ -8,11 +8,22 @@ import CommandPalette from "@/components/CommandPalette"
 import SearchTrigger from "@/components/SearchTrigger"
 import ContributorsSection from "@/components/ContributorsSection"
 import SiteFooter from "@/components/SiteFooter"
+import { isDoi, normalizeDoi, extractArxivFromDoi } from "@/lib/crossref"
 
 async function search(formData: FormData) {
   "use server"
   const q = formData.get("q")?.toString().trim()
   if (!q) return
+
+  // DOI input
+  const maybeDoi = normalizeDoi(q)
+  if (isDoi(maybeDoi)) {
+    const arxivId = extractArxivFromDoi(maybeDoi)
+    if (arxivId) redirect(`/${arxivId}`)
+    redirect(`/doi/${maybeDoi}`)
+  }
+
+  // arXiv ID or URL
   const id = q
     .replace(/^https?:\/\/arxiv\.org\/(abs|pdf)\//i, "")
     .replace(/^arxiv:/i, "")
