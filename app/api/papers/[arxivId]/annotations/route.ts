@@ -56,19 +56,21 @@ export async function POST(
     authorName: resolvedName.trim(),
   }).returning()
 
-  // Fire AI seed comment asynchronously — don't block the response
-  generateSeedComment({ paperTitle, anchorText, annotationBody: body })
-    .then(async (seedText) => {
-      if (!seedText) return
-      await db.insert(comments).values({
-        annotationId: row.id,
-        authorId: "ai",
-        authorName: "paper7 AI",
-        body: seedText,
-        isAi: 1,
+  // AI seed comment — only runs when ANTHROPIC_API_KEY is set (optional)
+  if (process.env.ANTHROPIC_API_KEY) {
+    generateSeedComment({ paperTitle, anchorText, annotationBody: body })
+      .then(async (seedText) => {
+        if (!seedText) return
+        await db.insert(comments).values({
+          annotationId: row.id,
+          authorId: "ai",
+          authorName: "paper7 AI",
+          body: seedText,
+          isAi: 1,
+        })
       })
-    })
-    .catch(err => console.error("seed comment failed:", err))
+      .catch(err => console.error("seed comment failed:", err))
+  }
 
   return NextResponse.json(row, { status: 201 })
 }
