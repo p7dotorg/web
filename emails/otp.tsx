@@ -30,16 +30,14 @@ export default function OtpEmail({ code = "123456", isNewUser = false }: OtpEmai
 
           <Text style={logo}>paper7</Text>
 
-          <Section style={card}>
-            <Text style={headline_}>{headline}</Text>
-            <Text style={subtext}>{sub}</Text>
+          <Text style={headline_}>{headline}</Text>
+          <Text style={subtext}>{sub}</Text>
 
-            <Section style={codeBox}>
-              <Text style={codeText}>{code}</Text>
-            </Section>
-
-            <Text style={expiry}>Expires in 10 minutes · Do not share this code</Text>
+          <Section style={codeBox}>
+            <Text style={codeText}>{code}</Text>
           </Section>
+
+          <Text style={expiry}>Expires in 10 minutes · Do not share this code</Text>
 
           <Hr style={divider} />
 
@@ -56,39 +54,34 @@ export default function OtpEmail({ code = "123456", isNewUser = false }: OtpEmai
 }
 
 const body: React.CSSProperties = {
-  backgroundColor: "#000000",
+  backgroundColor: "#f6f6f4",
   fontFamily: "Georgia, serif",
   margin: 0,
   padding: "48px 0",
 }
 
 const container: React.CSSProperties = {
+  backgroundColor: "#ffffff",
   maxWidth: "520px",
   margin: "0 auto",
-  padding: "0 24px",
+  padding: "48px 40px",
+  borderRadius: "8px",
 }
 
 const logo: React.CSSProperties = {
   fontFamily: "Georgia, serif",
-  fontSize: "22px",
+  fontSize: "20px",
   fontWeight: 400,
-  color: "#fcfdff",
+  color: "#0a0a0c",
   letterSpacing: "-0.5px",
   margin: "0 0 40px 0",
-}
-
-const card: React.CSSProperties = {
-  backgroundColor: "#0a0a0c",
-  border: "1px solid rgba(255,255,255,0.10)",
-  borderRadius: "16px",
-  padding: "40px",
 }
 
 const headline_: React.CSSProperties = {
   fontFamily: "Georgia, serif",
   fontSize: "26px",
   fontWeight: 400,
-  color: "#fcfdff",
+  color: "#0a0a0c",
   lineHeight: "1.25",
   letterSpacing: "-0.3px",
   margin: "0 0 8px 0",
@@ -97,15 +90,15 @@ const headline_: React.CSSProperties = {
 const subtext: React.CSSProperties = {
   fontFamily: "Arial, sans-serif",
   fontSize: "14px",
-  color: "rgba(252,253,255,0.5)",
+  color: "#666666",
   lineHeight: "1.6",
   margin: "0 0 36px 0",
 }
 
 const codeBox: React.CSSProperties = {
-  backgroundColor: "#06060a",
-  border: "1px solid rgba(255,255,255,0.12)",
-  borderRadius: "12px",
+  backgroundColor: "#f6f6f4",
+  border: "1px solid #e5e5e3",
+  borderRadius: "10px",
   padding: "28px 16px",
   textAlign: "center",
 }
@@ -114,9 +107,9 @@ const codeText: React.CSSProperties = {
   fontFamily: "'Courier New', Courier, monospace",
   fontSize: "42px",
   fontWeight: 700,
-  color: "#fcfdff",
-  letterSpacing: "16px",
-  textIndent: "16px",
+  color: "#0a0a0c",
+  letterSpacing: "14px",
+  textIndent: "14px",
   lineHeight: "1",
   margin: 0,
   textAlign: "center",
@@ -125,25 +118,25 @@ const codeText: React.CSSProperties = {
 const expiry: React.CSSProperties = {
   fontFamily: "Arial, sans-serif",
   fontSize: "11px",
-  color: "rgba(252,253,255,0.25)",
+  color: "#aaaaaa",
   textAlign: "center",
-  margin: "16px 0 0 0",
+  margin: "14px 0 0 0",
 }
 
 const divider: React.CSSProperties = {
-  borderColor: "rgba(255,255,255,0.06)",
-  margin: "32px 0",
+  borderColor: "#e5e5e3",
+  margin: "36px 0 28px 0",
 }
 
 const footer: React.CSSProperties = {
   fontFamily: "Arial, sans-serif",
   fontSize: "11px",
-  color: "rgba(252,253,255,0.2)",
+  color: "#aaaaaa",
   lineHeight: "1.6",
   margin: 0,
 }
 
 const footerLink: React.CSSProperties = {
-  color: "rgba(252,253,255,0.35)",
+  color: "#666666",
   textDecoration: "none",
 }
