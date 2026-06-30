@@ -60,6 +60,7 @@ export default function PaperReader({
   const [posting, setPosting] = useState(false)
   const [sessionUser, setSessionUser] = useState<AuthUser | null>(null)
   const [showAuth, setShowAuth] = useState(false)
+  const [annotating, setAnnotating] = useState(false) // step 2: show form
   const [savedStatus, setSavedStatus] = useState<"reading" | "read" | "want_to_read" | null>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -137,15 +138,29 @@ export default function PaperReader({
     if (!selection || !draftBody.trim()) return
     if (!sessionUser) { setShowAuth(true); return }
     await postAnnotation(selection, draftBody)
+    setAnnotating(false)
   }
 
   const handleAuthSuccess = (user: AuthUser) => {
     setSessionUser(user)
     setShowAuth(false)
     if (draftBody.trim() && selection) {
-      // use captured selection/draftBody before state clears
       postAnnotation(selection, draftBody)
+      setAnnotating(false)
+    } else {
+      setAnnotating(true)
     }
+  }
+
+  const openAnnotateForm = () => {
+    if (!sessionUser) { setShowAuth(true); return }
+    setAnnotating(true)
+  }
+
+  const closeSelection = () => {
+    setSelection(null)
+    setAnnotating(false)
+    setDraftBody("")
   }
 
   const upvote = async (id: string) => {
@@ -426,63 +441,108 @@ export default function PaperReader({
         </>
       )}
 
-      {/* Selection popup */}
-      {selection && (
-        <div
-          className="fixed z-50 rounded-xl p-4 w-80 shadow-2xl"
-          style={{
-            background: "#0a0a0c",
-            border: "1px solid rgba(255,255,255,0.14)",
-            left: Math.min(Math.max(selection.x - 160, 16), window.innerWidth - 340),
-            top: selection.y - 200,
-          }}
-        >
-          <p className="text-[11px] italic text-[#888e90] mb-3 line-clamp-2">"{selection.text}"</p>
+      {/* Step 1 — mini toolbar floating above selection */}
+      {selection && !annotating && !showAuth && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={closeSelection} />
+          <div
+            className="fixed z-50 flex items-center gap-1 rounded-lg px-1 py-1 shadow-2xl"
+            style={{
+              background: "#0a0a0c",
+              border: "1px solid rgba(255,255,255,0.16)",
+              left: Math.min(Math.max(selection.x - 70, 12), (typeof window !== "undefined" ? window.innerWidth : 800) - 160),
+              top: selection.y - 52,
+            }}
+          >
+            <button
+              onClick={openAnnotateForm}
+              className="flex items-center gap-1.5 px-3 h-8 rounded-md text-[13px] font-medium text-[#fcfdff] hover:bg-[rgba(255,255,255,0.08)] transition-colors"
+            >
+              <span>✎</span>
+              <span>Annotate</span>
+            </button>
+            <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.1)" }} />
+            <button
+              onClick={closeSelection}
+              className="w-8 h-8 flex items-center justify-center rounded-md text-[#888e90] hover:text-[#fcfdff] hover:bg-[rgba(255,255,255,0.06)] transition-colors text-[16px]"
+            >
+              ×
+            </button>
+          </div>
+        </>
+      )}
 
-          {showAuth ? (
+      {/* Step 2 — annotation form */}
+      {selection && annotating && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/40" onClick={closeSelection} />
+          <div
+            className="fixed z-50 rounded-2xl p-5 w-[340px] shadow-2xl"
+            style={{
+              background: "#0a0a0c",
+              border: "1px solid rgba(255,255,255,0.14)",
+              left: Math.min(Math.max(selection.x - 170, 12), (typeof window !== "undefined" ? window.innerWidth : 800) - 360),
+              top: Math.min(selection.y - 20, (typeof window !== "undefined" ? window.innerHeight : 800) - 260),
+            }}
+          >
+            <p className="text-[11px] italic text-[#888e90] mb-3 line-clamp-2 pb-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              &ldquo;{selection.text}&rdquo;
+            </p>
+            <textarea
+              autoFocus
+              value={draftBody}
+              onChange={e => setDraftBody(e.target.value)}
+              placeholder="What does this passage mean? What's missing? What's surprising?"
+              className="w-full text-[14px] text-[#fcfdff] placeholder:text-[#464a4d] rounded-xl p-3 h-28 resize-none focus:outline-none leading-relaxed"
+              style={{ background: "#06060a", border: "1px solid rgba(255,255,255,0.10)" }}
+              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit() }}
+            />
+            <div className="flex items-center justify-between mt-3">
+              <span className="text-[10px] text-[#464a4d]">
+                {sessionUser ? <>as <span className="text-[#888e90]">{sessionUser.name}</span></> : "⌘↵ to post"}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={closeSelection}
+                  className="px-3 h-8 text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors rounded-lg"
+                  style={{ border: "1px solid rgba(255,255,255,0.10)" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submit}
+                  disabled={posting || !draftBody.trim()}
+                  className="px-4 h-8 rounded-lg text-[12px] font-medium bg-[#fcfdff] text-black hover:bg-[rgba(252,253,255,0.9)] disabled:opacity-30 transition-colors"
+                >
+                  {posting ? "Saving…" : "Post"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Auth modal triggered from toolbar */}
+      {showAuth && (
+        <>
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={() => setShowAuth(false)} />
+          <div
+            className="fixed z-50 rounded-2xl p-6 w-80 shadow-2xl"
+            style={{
+              background: "#0a0a0c",
+              border: "1px solid rgba(255,255,255,0.14)",
+              top: "50%", left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <p className="font-display text-lg font-medium text-[#fcfdff] mb-1">Sign in to annotate</p>
+            <p className="text-[12px] text-[#888e90] mb-5">Enter your email — we'll send a code.</p>
             <AuthModal
               onSuccess={handleAuthSuccess}
               onCancel={() => { setShowAuth(false); setSelection(null) }}
             />
-          ) : (
-            <>
-              <textarea
-                autoFocus
-                value={draftBody}
-                onChange={e => setDraftBody(e.target.value)}
-                placeholder="Add your annotation..."
-                className="w-full text-sm text-[#fcfdff] placeholder:text-[#464a4d] rounded-lg p-3 h-24 resize-none focus:outline-none"
-                style={{ background: "#06060a", border: "1px solid rgba(255,255,255,0.14)" }}
-              />
-              {sessionUser ? (
-                <p className="text-[10px] text-[#464a4d] mt-1">
-                  Posting as <span className="text-[#888e90]">{sessionUser.name}</span>
-                  <button onClick={logout} className="ml-2 hover:text-[#fcfdff] transition-colors">sign out</button>
-                </p>
-              ) : (
-                <p className="text-[10px] text-[#464a4d] mt-1">
-                  You&apos;ll sign in with email to post
-                </p>
-              )}
-              <div className="flex gap-2 mt-2">
-                <button
-                  onClick={submit}
-                  disabled={posting || !draftBody.trim()}
-                  className="flex-1 h-9 rounded-lg text-sm font-medium bg-[#fcfdff] text-black hover:bg-[#f1f7fe] disabled:opacity-30 transition-colors"
-                >
-                  {posting ? "Saving…" : sessionUser ? "Annotate" : "Continue →"}
-                </button>
-                <button
-                  onClick={() => setSelection(null)}
-                  className="px-4 h-9 text-[13px] text-[#888e90] hover:text-[#fcfdff] transition-colors rounded-lg"
-                  style={{ border: "1px solid rgba(255,255,255,0.14)" }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+          </div>
+        </>
       )}
     </div>
   )
