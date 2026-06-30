@@ -316,24 +316,23 @@ export default function PaperReader({
                 >
                   <p className="text-[11px] italic text-[#888e90] line-clamp-1">"{ann.anchorText}"</p>
                   <p className="text-[13px] text-[rgba(252,253,255,0.86)] leading-relaxed line-clamp-3">{ann.body}</p>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-[#464a4d]">{ann.authorName}</span>
+                  <div className="flex items-center justify-between pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
                     <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-[#464a4d]">{ann.authorName}</span>
                       <button
                         onClick={e => { e.stopPropagation(); upvote(ann.id) }}
-                        className="text-[11px] text-[#888e90] hover:text-[#fcfdff] transition-colors flex items-center gap-1"
+                        className="text-[11px] text-[#888e90] hover:text-[#fcfdff] transition-colors flex items-center gap-0.5"
                       >
                         ▲ {ann.upvotes}
                       </button>
-                      <Link
-                        href={`/annotations/${ann.id}`}
-                        onClick={e => e.stopPropagation()}
-                        className="text-[11px] text-[#464a4d] hover:text-[#888e90] transition-colors"
-                        title="Open annotation page"
-                      >
-                        ↗
-                      </Link>
                     </div>
+                    <Link
+                      href={`/annotations/${ann.id}`}
+                      onClick={e => e.stopPropagation()}
+                      className="text-[11px] text-[#888e90] hover:text-[#fcfdff] transition-colors flex items-center gap-1"
+                    >
+                      discuss →
+                    </Link>
                   </div>
                 </div>
               ))}
