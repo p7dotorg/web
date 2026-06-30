@@ -204,40 +204,59 @@ export default function PaperReader({
     <div className="min-h-screen bg-black text-[#fcfdff]" onMouseUp={handleMouseUp} onClick={handleContentClick}>
       {/* Header */}
       <header
-        className="sticky top-0 z-20 flex items-center justify-between px-8 h-14"
+        className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-8 h-14"
         style={{ background: "#000", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
-        <div className="flex items-center gap-5">
+        {/* Left */}
+        <div className="flex items-center gap-4">
           <a href="/" className="font-display text-lg font-medium text-[#fcfdff]">paper7</a>
           <a href="/" className="text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors hidden sm:inline">feed</a>
         </div>
-        <div className="flex items-center gap-3">
+
+        {/* Right */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Categories — desktop only */}
           {cats.slice(0, 2).map(c => (
             <Link
               key={c}
               href={`/category/${encodeURIComponent(c)}`}
-              className="text-[10px] px-2 py-0.5 rounded-full text-[#888e90] hover:text-[#fcfdff] transition-colors hidden md:inline"
+              className="text-[10px] px-2 py-0.5 rounded-full text-[#888e90] hover:text-[#fcfdff] transition-colors hidden lg:inline"
               style={{ border: "1px solid rgba(255,255,255,0.14)" }}
             >
               {c}
             </Link>
           ))}
-          <SavePaperButton
-            paperId={paper.arxivId}
-            initialStatus={savedStatus}
-            session={sessionUser}
-          />
+
+          {/* Save paper — desktop only */}
+          <div className="hidden sm:block">
+            <SavePaperButton
+              paperId={paper.arxivId}
+              initialStatus={savedStatus}
+              session={sessionUser}
+            />
+          </div>
+
+          {/* Auth — always visible */}
           {sessionUser ? (
             <>
+              {/* Mobile: avatar initial → /me */}
               <Link
                 href="/me"
-                className="text-[12px] font-medium text-[#888e90] hover:text-[#fcfdff] transition-colors"
+                className="sm:hidden w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-black"
+                style={{ background: "#fcfdff" }}
+              >
+                {sessionUser.name[0].toUpperCase()}
+              </Link>
+              {/* Desktop: name + out */}
+              <Link
+                href="/me"
+                className="hidden sm:inline text-[12px] font-medium text-[#888e90] hover:text-[#fcfdff] transition-colors"
               >
                 {sessionUser.name}
               </Link>
               <button
                 onClick={logout}
-                className="text-[11px] px-3 py-1 rounded-lg text-[#464a4d] hover:text-[#888e90] transition-colors"
+                className="hidden sm:inline text-[11px] px-3 py-1 rounded-lg text-[#464a4d] hover:text-[#888e90] transition-colors"
                 style={{ border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 out
@@ -245,8 +264,8 @@ export default function PaperReader({
             </>
           ) : (
             <button
-              onClick={() => { setShowAuth(true) }}
-              className="text-[12px] px-4 py-1.5 rounded-lg font-medium text-[#fcfdff] hover:bg-[rgba(255,255,255,0.06)] transition-colors"
+              onClick={() => setShowAuth(true)}
+              className="text-[12px] px-3 sm:px-4 py-1.5 rounded-lg font-medium text-[#fcfdff] hover:bg-[rgba(255,255,255,0.06)] transition-colors"
               style={{ border: "1px solid rgba(255,255,255,0.14)" }}
             >
               Sign in
