@@ -128,10 +128,6 @@ export default async function Home() {
               </button>
             </form>
 
-            <div className="flex items-center gap-2 text-[#464a4d] text-sm select-none">
-              <span className="hidden sm:block">or</span>
-            </div>
-
             <NavAuth variant="hero" />
           </div>
         </div>

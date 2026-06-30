@@ -56,6 +56,9 @@ export default function NavAuth({ variant = "nav" }: { variant?: "nav" | "hero" 
 
   return (
     <>
+      {isHero && (
+        <span className="hidden sm:block text-[#464a4d] text-sm select-none">or</span>
+      )}
       <button
         onClick={() => setOpen(true)}
         className={
