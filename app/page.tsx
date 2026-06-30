@@ -79,7 +79,7 @@ export default async function Home() {
 
       {/* Nav */}
       <nav
-        className="sticky top-0 z-40 flex items-center justify-between px-8 h-16"
+        className="sticky top-0 z-40 flex items-center justify-between px-4 sm:px-8 h-14"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "#000" }}
       >
         <span className="font-display text-xl font-medium tracking-tight text-[#fcfdff]">paper7</span>
@@ -111,18 +111,18 @@ export default async function Home() {
 
           {/* Two primary CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <form action={search} className="flex gap-2 w-full sm:w-auto">
+            <form action={search} className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <input
                 name="q"
                 placeholder="2401.12345 or arxiv.org/abs/…"
-                className="flex-1 sm:w-72 h-11 px-4 rounded-xl text-sm text-[#fcfdff] placeholder:text-[var(--mute)]
+                className="w-full sm:w-72 h-11 px-4 rounded-xl text-sm text-[#fcfdff] placeholder:text-[var(--mute)]
                            bg-[#0a0a0c] focus:outline-none"
                 style={{ border: "1px solid rgba(255,255,255,0.14)" }}
               />
               <button
                 type="submit"
-                className="h-11 px-5 rounded-xl text-sm font-medium bg-[#fcfdff] text-black
-                           hover:bg-[#f1f7fe] transition-colors whitespace-nowrap shrink-0"
+                className="w-full sm:w-auto h-11 px-5 rounded-xl text-sm font-medium bg-[#fcfdff] text-black
+                           hover:bg-[#f1f7fe] transition-colors whitespace-nowrap"
               >
                 Open paper →
               </button>
