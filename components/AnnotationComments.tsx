@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { SessionUser } from "@/lib/session"
+import { useState, useEffect } from "react"
+import AuthModal, { AuthUser } from "./AuthModal"
 
 interface Comment {
   id: string
@@ -14,16 +14,29 @@ interface Comment {
 interface Props {
   annotationId: string
   initialComments: Comment[]
-  session: SessionUser | null
+  session: { email: string; name: string; id?: string } | null
 }
 
-export default function AnnotationComments({ annotationId, initialComments, session }: Props) {
+export default function AnnotationComments({ annotationId, initialComments, session: serverSession }: Props) {
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [draft, setDraft] = useState("")
   const [posting, setPosting] = useState(false)
+  const [session, setSession] = useState<AuthUser | null>(serverSession)
+  const [showAuth, setShowAuth] = useState(false)
+
+  // Re-validate session client-side (SSR cookie may not have been sent)
+  useEffect(() => {
+    if (!serverSession) {
+      fetch("/api/auth/session")
+        .then(r => r.json())
+        .then(u => { if (u?.email) setSession(u) })
+        .catch(() => {})
+    }
+  }, [serverSession])
 
   const submit = async () => {
-    if (!draft.trim() || !session) return
+    if (!draft.trim()) return
+    if (!session) { setShowAuth(true); return }
     setPosting(true)
     const res = await fetch(`/api/annotations/${annotationId}/comments`, {
       method: "POST",
@@ -43,12 +56,11 @@ export default function AnnotationComments({ annotationId, initialComments, sess
 
   const aiComments = comments.filter(c => c.isAi)
   const humanComments = comments.filter(c => !c.isAi)
-  const total = comments.length
 
   return (
     <div className="space-y-5">
       <p className="text-[10px] font-medium tracking-widest text-[#464a4d] uppercase">
-        Discussion ({total})
+        Discussion ({comments.length})
       </p>
 
       {/* AI seed comment — pinned at top */}
@@ -95,9 +107,9 @@ export default function AnnotationComments({ annotationId, initialComments, sess
         </div>
       ))}
 
-      {total === 0 && !session && (
+      {comments.length === 0 && (
         <p className="text-[13px] text-[#464a4d]">
-          No discussion yet. Sign in to start one.
+          {session ? "Be the first to comment." : "No discussion yet."}
         </p>
       )}
 
@@ -125,7 +137,7 @@ export default function AnnotationComments({ annotationId, initialComments, sess
               <button
                 onClick={submit}
                 disabled={posting || !draft.trim()}
-                className="h-8 px-4 rounded-lg text-[12px] font-medium bg-[#fcfdff] text-black hover:bg-[#f1f7fe] disabled:opacity-30 transition-colors"
+                className="h-8 px-4 rounded-lg text-[12px] font-medium bg-[#fcfdff] text-black hover:bg-[rgba(252,253,255,0.9)] disabled:opacity-30 transition-colors"
               >
                 {posting ? "Posting…" : "Comment"}
               </button>
@@ -133,9 +145,40 @@ export default function AnnotationComments({ annotationId, initialComments, sess
           </div>
         </div>
       ) : (
-        <p className="text-[12px] text-[#464a4d] pt-1">
-          <a href="/" className="text-[#888e90] hover:text-[#fcfdff] transition-colors">Sign in</a> to join the discussion
-        </p>
+        <button
+          onClick={() => setShowAuth(true)}
+          className="text-[12px] px-4 py-2 rounded-lg transition-colors text-[#888e90] hover:text-[#fcfdff]"
+          style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          Sign in to join the discussion
+        </button>
+      )}
+
+      {/* Auth modal */}
+      {showAuth && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowAuth(false)}
+          />
+          <div
+            className="fixed z-50 rounded-2xl p-6 w-80 shadow-2xl"
+            style={{
+              background: "#0a0a0c",
+              border: "1px solid rgba(255,255,255,0.14)",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <p className="font-display text-lg font-medium text-[#fcfdff] mb-1">Sign in to comment</p>
+            <p className="text-[12px] text-[#888e90] mb-5">Enter your email — we'll send a code.</p>
+            <AuthModal
+              onSuccess={u => { setSession(u); setShowAuth(false) }}
+              onCancel={() => setShowAuth(false)}
+            />
+          </div>
+        </>
       )}
     </div>
   )
