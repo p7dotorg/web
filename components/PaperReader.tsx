@@ -200,7 +200,7 @@ export default function PaperReader({
   const paragraphs = paper.markdown
     .split(/\n{2,}/)
     .filter(p => p.trim().length > 0)
-    .filter(p => !/superscript|subscript|\\mathrm|\\mathbb|\\tilde|\\ell|\bltx_/i.test(p))
+    .filter(p => !/superscript|subscript|\\mathrm|\\mathbb|\\tilde|\\ell|\\leavevmode|\bltx_/i.test(p))
   const isHeading = (p: string) => p.startsWith("## ")
   const cats = (paper.categories ?? "").split(",").map(c => c.trim()).filter(Boolean)
 

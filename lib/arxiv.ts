@@ -45,7 +45,7 @@ function stripNoisyElements(html: string): string {
     .replace(/<span[^>]*class="[^"]*ltx_note[^"]*"[\s\S]*?<\/span>/gi, "")
 }
 
-const BROKEN_TEXT_RE = /superscript|subscript|ltx_|\\mathrm|\\mathbb|\\tilde|\\ell/i
+const BROKEN_TEXT_RE = /superscript|subscript|ltx_|\\mathrm|\\mathbb|\\tilde|\\ell|\\leavevmode/i
 
 function extractSections(html: string): string {
   // Skip title/author/abstract header — target only <section> content
