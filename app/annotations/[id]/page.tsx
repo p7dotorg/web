@@ -1,8 +1,10 @@
 import { db } from "@/db"
-import { annotations, papers } from "@/db/schema"
-import { eq, desc, and, ne } from "drizzle-orm"
+import { annotations, papers, comments } from "@/db/schema"
+import { eq, desc, and, ne, asc } from "drizzle-orm"
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import { getSession } from "@/lib/session"
+import AnnotationComments from "@/components/AnnotationComments"
 
 export default async function AnnotationPage({
   params,
@@ -31,28 +33,33 @@ export default async function AnnotationPage({
 
   if (!row) notFound()
 
-  const others = await db
-    .select()
-    .from(annotations)
-    .where(and(eq(annotations.paperId, row.paperId), ne(annotations.id, id)))
-    .orderBy(desc(annotations.upvotes))
-    .limit(4)
+  const [others, initialComments, session] = await Promise.all([
+    db
+      .select()
+      .from(annotations)
+      .where(and(eq(annotations.paperId, row.paperId), ne(annotations.id, id)))
+      .orderBy(desc(annotations.upvotes))
+      .limit(4),
+    db
+      .select()
+      .from(comments)
+      .where(eq(comments.annotationId, id))
+      .orderBy(asc(comments.createdAt)),
+    getSession(),
+  ])
 
   const cats = (row.paperCategories ?? "").split(",").map((c: string) => c.trim()).filter(Boolean)
   const date = new Date(row.createdAt).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+    month: "short", day: "numeric", year: "numeric",
   })
 
   return (
     <div className="min-h-screen bg-black text-[#fcfdff]">
-      {/* Nav */}
       <header
         className="sticky top-0 z-20 flex items-center justify-between px-8 h-14"
         style={{ background: "#000", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
-        <Link href="/" className="font-display text-lg font-medium text-[#fcfdff]">p7</Link>
+        <Link href="/" className="font-display text-lg font-medium text-[#fcfdff]">paper7</Link>
         <Link
           href={`/${row.paperId}`}
           className="text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
@@ -91,7 +98,6 @@ export default async function AnnotationPage({
           className="rounded-2xl p-6 space-y-5"
           style={{ background: "#0a0a0c", border: "1px solid rgba(255,255,255,0.14)" }}
         >
-          {/* Anchor quote */}
           <div
             className="rounded-xl px-4 py-3"
             style={{ background: "#06060a", border: "1px solid rgba(255,255,255,0.06)" }}
@@ -101,17 +107,15 @@ export default async function AnnotationPage({
             </p>
           </div>
 
-          {/* Body */}
           <p className="text-[16px] text-[rgba(252,253,255,0.9)] leading-[1.75]">
             {row.body}
           </p>
 
-          {/* Meta */}
           <div
             className="flex items-center justify-between pt-2"
             style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
           >
-            <div className="space-y-0.5">
+            <div>
               <p className="text-[13px] text-[#fcfdff]">{row.authorName}</p>
               <p className="text-[11px] text-[#464a4d]">{date}</p>
             </div>
@@ -125,7 +129,17 @@ export default async function AnnotationPage({
           </div>
         </div>
 
-        {/* CTA — read in context */}
+        {/* Comments — client component */}
+        <AnnotationComments
+          annotationId={id}
+          initialComments={initialComments.map(c => ({
+            ...c,
+            createdAt: c.createdAt.toISOString(),
+          }))}
+          session={session}
+        />
+
+        {/* Read in context */}
         <Link
           href={`/${row.paperId}`}
           className="flex items-center justify-between w-full rounded-xl px-5 py-4 transition-colors group"
@@ -138,7 +152,7 @@ export default async function AnnotationPage({
           <span className="text-[#888e90] group-hover:text-[#fcfdff] transition-colors text-lg">→</span>
         </Link>
 
-        {/* Other annotations on this paper */}
+        {/* Other annotations */}
         {others.length > 0 && (
           <div className="space-y-3">
             <p className="text-[10px] font-medium tracking-widest text-[#464a4d] uppercase">

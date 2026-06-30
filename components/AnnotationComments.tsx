@@ -1,0 +1,112 @@
+"use client"
+
+import { useState } from "react"
+import { SessionUser } from "@/lib/session"
+
+interface Comment {
+  id: string
+  authorName: string
+  body: string
+  createdAt: string
+}
+
+interface Props {
+  annotationId: string
+  initialComments: Comment[]
+  session: SessionUser | null
+}
+
+export default function AnnotationComments({ annotationId, initialComments, session }: Props) {
+  const [comments, setComments] = useState<Comment[]>(initialComments)
+  const [draft, setDraft] = useState("")
+  const [posting, setPosting] = useState(false)
+
+  const submit = async () => {
+    if (!draft.trim() || !session) return
+    setPosting(true)
+    const res = await fetch(`/api/annotations/${annotationId}/comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ body: draft }),
+    })
+    if (res.ok) {
+      const c = await res.json()
+      setComments(prev => [...prev, { ...c, createdAt: c.createdAt }])
+      setDraft("")
+    }
+    setPosting(false)
+  }
+
+  const fmt = (d: string) =>
+    new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+
+  return (
+    <div className="space-y-4">
+      <p className="text-[10px] font-medium tracking-widest text-[#464a4d] uppercase">
+        Discussion ({comments.length})
+      </p>
+
+      {comments.length === 0 && !session && (
+        <p className="text-[13px] text-[#464a4d]">
+          No comments yet. Sign in to start the discussion.
+        </p>
+      )}
+
+      {/* Comment list */}
+      {comments.map(c => (
+        <div key={c.id} className="flex gap-3">
+          <div
+            className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[11px] font-medium text-black mt-0.5"
+            style={{ background: "#fcfdff" }}
+          >
+            {c.authorName[0].toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-[13px] font-medium text-[#fcfdff]">{c.authorName}</span>
+              <span className="text-[11px] text-[#464a4d]">{fmt(c.createdAt)}</span>
+            </div>
+            <p className="text-[13px] text-[rgba(252,253,255,0.8)] leading-relaxed">{c.body}</p>
+          </div>
+        </div>
+      ))}
+
+      {/* Comment input */}
+      {session ? (
+        <div className="flex gap-3 pt-2">
+          <div
+            className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[11px] font-medium text-black mt-1"
+            style={{ background: "#fcfdff" }}
+          >
+            {session.name[0].toUpperCase()}
+          </div>
+          <div className="flex-1 space-y-2">
+            <textarea
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              placeholder="Add a comment…"
+              rows={2}
+              className="w-full text-sm text-[#fcfdff] placeholder:text-[#464a4d] rounded-xl px-3 py-2.5 resize-none focus:outline-none"
+              style={{ background: "#0a0a0c", border: "1px solid rgba(255,255,255,0.14)" }}
+              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit() }}
+            />
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-[#464a4d]">⌘↵ to submit</span>
+              <button
+                onClick={submit}
+                disabled={posting || !draft.trim()}
+                className="h-8 px-4 rounded-lg text-[12px] font-medium bg-[#fcfdff] text-black hover:bg-[#f1f7fe] disabled:opacity-30 transition-colors"
+              >
+                {posting ? "Posting…" : "Comment"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <p className="text-[12px] text-[#464a4d] pt-1">
+          <a href="/" className="text-[#888e90] hover:text-[#fcfdff] transition-colors">Sign in</a> to comment
+        </p>
+      )}
+    </div>
+  )
+}

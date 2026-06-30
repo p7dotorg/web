@@ -8,6 +8,7 @@ const SECRET = new TextEncoder().encode(
 export interface SessionUser {
   email: string
   name: string
+  id?: string
 }
 
 export async function signSession(user: SessionUser): Promise<string> {
