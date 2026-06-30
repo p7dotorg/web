@@ -5,6 +5,7 @@ import Link from "next/link"
 import katex from "katex"
 import "katex/dist/katex.min.css"
 import AuthModal, { AuthUser } from "./AuthModal"
+import SavePaperButton from "./SavePaperButton"
 
 interface Annotation {
   id: string
@@ -59,12 +60,24 @@ export default function PaperReader({
   const [posting, setPosting] = useState(false)
   const [sessionUser, setSessionUser] = useState<AuthUser | null>(null)
   const [showAuth, setShowAuth] = useState(false)
+  const [savedStatus, setSavedStatus] = useState<"reading" | "read" | "want_to_read" | null>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch("/api/auth/session")
       .then(r => r.json())
-      .then(u => { if (u?.email) setSessionUser(u) })
+      .then(u => {
+        if (u?.email) {
+          setSessionUser(u)
+          fetch("/api/user/papers")
+            .then(r => r.json())
+            .then((list: { paperId: string; status: string }[]) => {
+              const entry = list.find(p => p.paperId === paper.arxivId)
+              if (entry) setSavedStatus(entry.status as "reading" | "read" | "want_to_read")
+            })
+            .catch(() => {})
+        }
+      })
       .catch(() => {})
   }, [])
 
@@ -192,14 +205,19 @@ export default function PaperReader({
             </Link>
           ))}
           <span className="text-[11px] text-[#888e90] hidden sm:inline">{paper.arxivId}</span>
+          <SavePaperButton
+            paperId={paper.arxivId}
+            initialStatus={savedStatus}
+            session={sessionUser}
+          />
           {sessionUser ? (
-            <button
-              onClick={logout}
+            <Link
+              href="/me"
               className="text-[11px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
               title={`Signed in as ${sessionUser.email}`}
             >
-              {sessionUser.name} ·<span className="ml-1">out</span>
-            </button>
+              {sessionUser.name} ·<span className="ml-1 text-[#464a4d]">me</span>
+            </Link>
           ) : (
             <button
               onClick={() => { setShowAuth(true) }}
