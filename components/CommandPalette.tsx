@@ -9,7 +9,7 @@ const CATEGORIES = [
 ]
 
 const SHORTCUTS = [
-  { label: "Search by arXiv ID", hint: "e.g. 2401.12345", action: null },
+  { label: "Search by arXiv ID or DOI", hint: "e.g. 2401.12345 or 10.xxxx/…", action: null },
   { label: "Browse cs.AI", hint: "category", action: "/category/cs.AI" },
   { label: "Browse cs.LG", hint: "category", action: "/category/cs.LG" },
   { label: "Browse cs.CL", hint: "category", action: "/category/cs.CL" },
@@ -44,6 +44,11 @@ export default function CommandPalette() {
 
   const isArxivId = (q: string) => /^\d{4}\.\d{4,5}(v\d+)?$/.test(q.trim())
   const isUrl = (q: string) => q.includes("arxiv.org")
+  const isDoi = (q: string) =>
+    /^10\.\d{4,}\/\S+/.test(q.trim()) ||
+    /^https?:\/\/(dx\.)?doi\.org\/10\.\d{4,}\/\S+/.test(q.trim())
+  const normalizeDoi = (q: string) =>
+    q.trim().replace(/^https?:\/\/(dx\.)?doi\.org\//i, "").trim()
 
   const resolveId = (q: string) => {
     if (isUrl(q)) {
@@ -63,7 +68,16 @@ export default function CommandPalette() {
   const items: Array<{ label: string; hint: string; action: () => void }> = []
 
   if (query) {
-    if (isArxivId(query) || isUrl(query)) {
+    if (isDoi(query)) {
+      const doi = normalizeDoi(query)
+      const arxivMatch = doi.match(/10\.48550\/arXiv\.(\d{4}\.\d{4,5})/i)
+      const target = arxivMatch ? `/${arxivMatch[1]}` : `/doi/${doi}`
+      items.push({
+        label: `Open DOI ${doi}`,
+        hint: "Crossref",
+        action: () => router.push(target),
+      })
+    } else if (isArxivId(query) || isUrl(query)) {
       items.push({
         label: `Open paper ${resolveId(query)}`,
         hint: "arXiv",
@@ -133,7 +147,7 @@ export default function CommandPalette() {
             value={query}
             onChange={e => { setQuery(e.target.value); setSelected(0) }}
             onKeyDown={onKeyDown}
-            placeholder="Search papers, browse categories…"
+            placeholder="arXiv ID, DOI, or category…"
             className="flex-1 h-12 text-sm text-[#fcfdff] placeholder:text-[#464a4d] bg-transparent focus:outline-none"
           />
           <kbd
