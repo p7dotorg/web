@@ -7,6 +7,7 @@ import NavAuth from "@/components/NavAuth"
 import CommandPalette from "@/components/CommandPalette"
 import SearchTrigger from "@/components/SearchTrigger"
 import ContributorsSection from "@/components/ContributorsSection"
+import SiteFooter from "@/components/SiteFooter"
 
 async function search(formData: FormData) {
   "use server"
@@ -280,16 +281,7 @@ export default async function Home() {
         )}
       </div>
 
-      {/* Footer */}
-      <footer
-        className="px-8 py-10"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
-      >
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <span className="font-display text-sm text-[var(--ash)]">p7</span>
-          <span className="text-xs text-[var(--ash)]">Read papers together</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
