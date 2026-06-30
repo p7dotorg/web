@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { otpCodes, users } from "@/db/schema"
 import { Resend } from "resend"
+import { render } from "@react-email/components"
 import { eq } from "drizzle-orm"
+import OtpEmail from "@/emails/otp"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
@@ -30,8 +32,8 @@ export async function POST(req: NextRequest) {
       const result = await resend.emails.send({
         from: "paper7 <noreply@paper7.org>",
         to: email,
-        subject: `Your p7 code: ${code}`,
-        html: `<p style="font-family:monospace;font-size:32px;letter-spacing:8px"><b>${code}</b></p><p>Valid for 10 minutes.</p>`,
+        subject: `${code} — your paper7 code`,
+        html: await render(OtpEmail({ code, isNewUser })),
       })
       if (result.error) {
         console.error("Resend error:", result.error)
