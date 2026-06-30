@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import AuthModal, { AuthUser } from "./AuthModal"
 
 export default function NavAuth({ variant = "nav" }: { variant?: "nav" | "hero" }) {
@@ -26,7 +27,12 @@ export default function NavAuth({ variant = "nav" }: { variant?: "nav" | "hero" 
     if (variant === "hero") return null // hero slot disappears when logged in
     return (
       <div className="flex items-center gap-3">
-        <span className="text-[12px] text-[#888e90] hidden sm:inline">{user.email}</span>
+        <Link
+          href="/me"
+          className="text-[13px] font-medium text-[#fcfdff] hover:opacity-70 transition-opacity hidden sm:inline"
+        >
+          {user.name}
+        </Link>
         <button
           onClick={logout}
           className="h-8 px-3 rounded-lg text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors"

@@ -5,6 +5,8 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getSession } from "@/lib/session"
 import AnnotationComments from "@/components/AnnotationComments"
+import SavePaperButton from "@/components/SavePaperButton"
+import { userPapers } from "@/db/schema"
 
 export default async function AnnotationPage({
   params,
@@ -48,6 +50,15 @@ export default async function AnnotationPage({
     getSession(),
   ])
 
+  const savedPaper = session?.id
+    ? await db
+        .select()
+        .from(userPapers)
+        .where(and(eq(userPapers.userId, session.id), eq(userPapers.paperId, row.paperId)))
+        .limit(1)
+        .then(r => r[0] ?? null)
+    : null
+
   const cats = (row.paperCategories ?? "").split(",").map((c: string) => c.trim()).filter(Boolean)
   const date = new Date(row.createdAt).toLocaleDateString("en-US", {
     month: "short", day: "numeric", year: "numeric",
@@ -60,12 +71,19 @@ export default async function AnnotationPage({
         style={{ background: "#000", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <Link href="/" className="font-display text-lg font-medium text-[#fcfdff]">paper7</Link>
-        <Link
-          href={`/${row.paperId}`}
-          className="text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
-        >
-          ← Back to paper
-        </Link>
+        <div className="flex items-center gap-3">
+          <SavePaperButton
+            paperId={row.paperId}
+            initialStatus={(savedPaper?.status as "reading" | "read" | "want_to_read") ?? null}
+            session={session}
+          />
+          <Link
+            href={`/${row.paperId}`}
+            className="text-[12px] text-[#888e90] hover:text-[#fcfdff] transition-colors"
+          >
+            ← paper
+          </Link>
+        </div>
       </header>
 
       <div className="max-w-2xl mx-auto px-6 py-16 space-y-10">
