@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function SiteNav({ right }: Props) {
-  const [user, setUser] = useState<AuthUser | null | undefined>(undefined)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
@@ -48,9 +48,7 @@ export default function SiteNav({ right }: Props) {
         <div className="flex items-center gap-2 sm:gap-3">
           {right}
 
-          {user === undefined ? (
-            <div className="w-8 h-8" />
-          ) : user ? (
+          {user ? (
             <>
               {/* Avatar → /me (all sizes) */}
               <Link

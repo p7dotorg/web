@@ -5,7 +5,7 @@ import Link from "next/link"
 import AuthModal, { AuthUser } from "./AuthModal"
 
 export default function NavAuth({ variant = "nav" }: { variant?: "nav" | "hero" }) {
-  const [user, setUser] = useState<AuthUser | null | undefined>(undefined)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
@@ -19,9 +19,6 @@ export default function NavAuth({ variant = "nav" }: { variant?: "nav" | "hero" 
     await fetch("/api/auth/session", { method: "DELETE" })
     setUser(null)
   }
-
-  // still loading
-  if (user === undefined) return <div className="w-16 h-8" />
 
   if (user) {
     if (variant === "hero") return null // hero slot disappears when logged in
