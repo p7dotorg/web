@@ -89,7 +89,7 @@ export default function NavAuth({ variant = "nav" }: { variant?: "nav" | "hero" 
           >
             <p className="font-display text-lg font-medium text-[#fcfdff] mb-1">Welcome to p7</p>
             <p className="text-[12px] text-[#888e90] mb-5">
-              Marginalia for arXiv. Sign in to annotate papers.
+              Sign in to annotate papers and join the discussion.
             </p>
             <AuthModal
               onSuccess={u => { setUser(u); setOpen(false) }}

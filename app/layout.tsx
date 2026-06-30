@@ -12,12 +12,12 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "paper7 — Annotate academic papers",
-  description: "Like Genius, but for papers. Marginalia for arXiv.",
+  description: "Highlight passages in research papers, annotate what matters, discuss with other readers.",
   metadataBase: new URL("https://paper7.org"),
   openGraph: {
     siteName: "paper7",
     title: "paper7 — Annotate academic papers",
-    description: "Like Genius, but for papers. Marginalia for arXiv.",
+    description: "Highlight passages in research papers, annotate what matters, discuss with other readers.",
   },
 }
 

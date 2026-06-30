@@ -97,20 +97,16 @@ export default async function Home() {
         }}
       >
         <div className="max-w-3xl mx-auto text-center space-y-8">
-          <p className="text-xs font-medium tracking-widest text-[var(--charcoal)] uppercase">
-            Marginalia for arXiv
-          </p>
-
           <h1
-            className="font-display text-[clamp(52px,8vw,88px)] leading-none tracking-tight text-[#fcfdff]"
+            className="font-display text-[clamp(48px,7vw,84px)] leading-none tracking-tight text-[#fcfdff]"
           >
-            Annotate what{" "}
-            <span className="italic">matters.</span>
+            Read papers.{" "}
+            <span className="italic">Together.</span>
           </h1>
 
           <p className="text-lg text-[var(--body)] max-w-lg mx-auto leading-relaxed">
-            Select any passage in a research paper and leave a public annotation.
-            Understand the subtext. Surface what the abstract hides.
+            Highlight any passage, leave an annotation, discuss with other readers.
+            The subtext of research — made public.
           </p>
 
           {/* Two primary CTAs */}
@@ -258,7 +254,7 @@ export default async function Home() {
       >
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <span className="font-display text-sm text-[var(--ash)]">p7</span>
-          <span className="text-xs text-[var(--ash)]">Marginalia for arXiv</span>
+          <span className="text-xs text-[var(--ash)]">Read papers together</span>
         </div>
       </footer>
     </div>

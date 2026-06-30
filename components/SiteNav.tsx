@@ -105,7 +105,7 @@ export default function SiteNav({ right }: Props) {
           >
             <p className="font-display text-lg font-medium text-[#fcfdff] mb-1">Welcome to paper7</p>
             <p className="text-[12px] text-[#888e90] mb-5">
-              Marginalia for arXiv. Sign in to annotate papers.
+              Sign in to annotate papers and join the discussion.
             </p>
             <AuthModal
               onSuccess={u => { setUser(u); setOpen(false) }}
