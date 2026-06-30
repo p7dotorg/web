@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { db } from "@/db"
 import { papers, annotations } from "@/db/schema"
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, ne, sql } from "drizzle-orm"
 import Link from "next/link"
 import NavAuth from "@/components/NavAuth"
 import CommandPalette from "@/components/CommandPalette"
@@ -46,6 +46,26 @@ async function getFeatured() {
   }
 }
 
+async function getTopContributors() {
+  try {
+    const rows = await db
+      .select({
+        authorId: annotations.authorId,
+        authorName: annotations.authorName,
+        annotationCount: sql<number>`count(*)::int`,
+        totalUpvotes: sql<number>`coalesce(sum(${annotations.upvotes}), 0)::int`,
+      })
+      .from(annotations)
+      .where(ne(annotations.authorId, "ai"))
+      .groupBy(annotations.authorId, annotations.authorName)
+      .orderBy(desc(sql`count(*)`))
+      .limit(8)
+    return rows
+  } catch {
+    return []
+  }
+}
+
 async function getTopAnnotations() {
   try {
     return await db
@@ -68,9 +88,10 @@ async function getTopAnnotations() {
 }
 
 export default async function Home() {
-  const [featured, topAnnotations] = await Promise.all([
+  const [featured, topAnnotations, topContributors] = await Promise.all([
     getFeatured(),
     getTopAnnotations(),
+    getTopContributors(),
   ])
 
   return (
@@ -228,6 +249,46 @@ export default async function Home() {
                   >
                     paper →
                   </Link>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Top contributors */}
+        {topContributors.length > 0 && (
+          <section>
+            <p className="text-[10px] font-medium tracking-widest text-[var(--charcoal)] uppercase mb-6">
+              Top contributors
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {topContributors.map((c, i) => (
+                <div
+                  key={c.authorId}
+                  className="flex items-center gap-3 rounded-xl px-4 py-3"
+                  style={{ background: "#0a0a0c", border: "1px solid rgba(255,255,255,0.06)" }}
+                >
+                  {/* Rank */}
+                  <span className="text-[11px] text-[var(--charcoal)] w-4 shrink-0 tabular-nums">
+                    {i + 1}
+                  </span>
+                  {/* Avatar */}
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-black shrink-0"
+                    style={{ background: "#fcfdff" }}
+                  >
+                    {c.authorName[0].toUpperCase()}
+                  </div>
+                  {/* Info */}
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-medium text-[#fcfdff] truncate">{c.authorName}</p>
+                    <p className="text-[11px] text-[var(--ash)]">
+                      {c.annotationCount} note{c.annotationCount !== 1 ? "s" : ""}
+                      {c.totalUpvotes > 0 && (
+                        <span className="text-[var(--charcoal)]"> · ▲{c.totalUpvotes}</span>
+                      )}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
